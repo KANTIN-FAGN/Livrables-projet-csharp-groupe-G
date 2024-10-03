@@ -3,11 +3,113 @@
 
 <PageTitle>Calculator</PageTitle>
 
-<h1>Calculator</h1>
+<div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
 
-<p role="status">Current count: @currentCount</p>
+    <h1>Calculator</h1>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div class="bg-black" style="width: 450px; height: 720px; border-radius: 30px">
+        <div class="h-25 d-flex justify-content-end align-items-end text display-3" style="margin-right: 1rem">
+            <p role="status" class="text-white">@currentCount</p>
+        </div>
+        <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-row justify-content-around">
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px">
+                    AC
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px">
+                    <svg width="40px" height="40px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 4 4 20M4 7h3m3 0H7m0 0V4m0 3v3m7 7h6"/>
+                    </svg>
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px">
+                    <svg fill="white" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                         width="30px" height="30px" viewBox="0 0 394.4 394.4" xml:space="preserve">
+                        <g>
+                            <path d="M37.4,377.4c-5.223,0-10.438-1.992-14.423-5.977c-7.97-7.963-7.97-20.883,0-28.846l319.6-319.601
+		c7.97-7.97,20.876-7.97,28.846,0c7.97,7.962,7.97,20.882,0,28.845l-319.6,319.601C47.838,375.408,42.623,377.4,37.4,377.4z
+		 M394.4,299.199c0-52.496-42.704-95.199-95.2-95.199S204,246.703,204,299.199s42.704,95.201,95.2,95.201
+		S394.4,351.695,394.4,299.199z M353.601,299.199c0,29.996-24.405,54.4-54.4,54.4s-54.4-24.404-54.4-54.4
+		c0-29.994,24.405-54.398,54.4-54.398S353.601,269.205,353.601,299.199z M190.4,95.2C190.4,42.704,147.696,0,95.2,0S0,42.704,0,95.2
+		s42.704,95.2,95.2,95.2S190.4,147.696,190.4,95.2z M149.6,95.2c0,29.995-24.405,54.4-54.4,54.4s-54.4-24.405-54.4-54.4
+		s24.405-54.4,54.4-54.4S149.6,65.206,149.6,95.2z"/>
+                        </g>
+                    </svg>
+                </button>
+                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white">
+                    <svg width="50px" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 12H20M13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="d-flex flex-row justify-content-around">
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    7
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    8
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    9
+                </button>
+                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white">
+                    <svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="d-flex flex-row justify-content-around">
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    4
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    5
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    6
+                </button>
+                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white">
+                    <svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="d-flex flex-row justify-content-around">
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    1
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    2
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    3
+                </button>
+                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white">
+                    <svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="d-flex flex-row justify-content-around">
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    <svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 9L11 15M11 9L17 15M2.72 12.96L7.04 18.72C7.392 19.1893 7.568 19.424 7.79105 19.5932C7.9886 19.7432 8.21232 19.855 8.45077 19.9231C8.72 20 9.01334 20 9.6 20H17.2C18.8802 20 19.7202 20 20.362 19.673C20.9265 19.3854 21.3854 18.9265 21.673 18.362C22 17.7202 22 16.8802 22 15.2V8.8C22 7.11984 22 6.27976 21.673 5.63803C21.3854 5.07354 20.9265 4.6146 20.362 4.32698C19.7202 4 18.8802 4 17.2 4H9.6C9.01334 4 8.72 4 8.45077 4.07689C8.21232 4.14499 7.9886 4.25685 7.79105 4.40675C7.568 4.576 7.392 4.81067 7.04 5.28L2.72 11.04C2.46181 11.3843 2.33271 11.5564 2.28294 11.7454C2.23902 11.9123 2.23902 12.0877 2.28294 12.2546C2.33271 12.4436 2.46181 12.6157 2.72 12.96Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    0
+                </button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">
+                    ,
+                </button>
+                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick="IncrementCount">
+                    <svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 9H19M5 15H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private int currentCount = 0;
