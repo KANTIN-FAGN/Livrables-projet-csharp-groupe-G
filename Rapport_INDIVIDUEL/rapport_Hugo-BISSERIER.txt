@@ -1,0 +1,8 @@
+- Quizz 
+
+
+- Objectif : 
+Mon objectif pour la création du jeu "Qui veut gagner des millions ?"
+est de concevoir un système de quiz en C# avec des questions à choix multiples,
+un affichage progressif des niveaux de difficulté,
+et la gestion des jokers pour offrir une expérience de jeu immersive et interactive.
