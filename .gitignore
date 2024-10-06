@@ -1,1 +1,53 @@
-﻿
+﻿# Fichiers binaires compilés
+bin/
+obj/
+
+# Dossiers de dépendances locales et temporaires
+*.vs/
+*.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Fichiers générés par les outils de build et logs
+*.cache/
+*.log
+
+# Rider et IDE JetBrains
+.idea/
+*.sln.iml
+.idea_modules/
+
+# Dossiers de l'outil de débogage
+.vscode/launch.json
+.vscode/tasks.json
+
+# Dépendances du système
+*.DS_Store
+*.directory
+Thumbs.db
+
+# Paquets NuGet
+*.nupkg
+*.nuget/
+
+# Dossiers et fichiers spécifiques à Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Packages et dépendances générés
+packages/
+*.snupkg
+
+# Secrets ou clés locales
+secrets.json
+
+# Fichiers générés lors de la publication
+*.PublishProfiles/
+*.pubxml
+*.pubxml.user
+
+# Logs et caches spécifiques au projet
+*.log
