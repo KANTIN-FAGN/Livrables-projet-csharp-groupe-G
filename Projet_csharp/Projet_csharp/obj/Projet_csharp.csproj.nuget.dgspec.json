@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kween\\Bureau\\Ynov\\SEMESTRE 1\\Module_C#\\PROJET\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj": {}
+    "C:\\Users\\kween\\Desktop\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kween\\Bureau\\Ynov\\SEMESTRE 1\\Module_C#\\PROJET\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj": {
+    "C:\\Users\\kween\\Desktop\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kween\\Bureau\\Ynov\\SEMESTRE 1\\Module_C#\\PROJET\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj",
+        "projectUniqueName": "C:\\Users\\kween\\Desktop\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj",
         "projectName": "Projet_csharp",
-        "projectPath": "C:\\Users\\kween\\Bureau\\Ynov\\SEMESTRE 1\\Module_C#\\PROJET\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj",
+        "projectPath": "C:\\Users\\kween\\Desktop\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\Projet_csharp.csproj",
         "packagesPath": "C:\\Users\\kween\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kween\\Bureau\\Ynov\\SEMESTRE 1\\Module_C#\\PROJET\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\obj\\",
+        "outputPath": "C:\\Users\\kween\\Desktop\\Livrables-projet-csharp-groupe-G\\Projet_csharp\\Projet_csharp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\kween\\AppData\\Roaming\\NuGet\\NuGet.Config"
