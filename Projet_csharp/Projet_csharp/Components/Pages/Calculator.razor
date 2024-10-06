@@ -4,7 +4,7 @@
 <PageTitle>Calculator (Addition and Subtraction)</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
-    <h1>Calculator (Addition and Subtraction)</h1>
+    <h1>Calculator</h1>
 
     <div class="bg-black" style="width: 450px; height: 720px; border-radius: 30px">
         <div class="h-25 d-flex justify-content-end align-items-end text display-3" style="margin-right: 1rem">
@@ -13,7 +13,9 @@
         <div class="d-flex flex-column gap-2">
             <div class="d-flex flex-row justify-content-around">
                 <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick="Reset">AC</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px">±</button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick="ToggleSign">
+                    <i class="bi bi-plus-slash-minus"></i>
+                </button>
                 <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick='() => SetOperation("%")'>%</button>
                 <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("÷")'>÷</button>
             </div>
@@ -36,9 +38,11 @@
                 <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("+")'>+</button>
             </div>
             <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">±</button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick="DeleteLastCharacter">
+                    <i class="bi bi-backspace"></i>
+                </button>
                 <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("0")'>0</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px">,</button>
+                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" >,</button>
                 <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick="Calculate">=</button>
             </div>
         </div>
@@ -46,88 +50,126 @@
 </div>
 
 @code {
-    private string displayValue = "0"; // Pour afficher l'expression
-    private double currentResult = 0; // Pour stocker le résultat courant
+    private string displayValue = "0"; // Pour afficher l'opération dans le calculateur
+    private double currentResult = 0; // Pour stocker le résultat
 
+    // Fonction pour ajouter un chiffre à l'affichage
     private void InputNumber(string number)
     {
-        // Ajouter le nombre à l'affichage
+        // Si l'affichage est vide ou égal à "0", remplacer par le nouveau chiffre
         if (string.IsNullOrEmpty(displayValue) || displayValue == "0")
         {
-            displayValue = number; // Si rien n'est affiché ou affichage est "0", remplacer par ce nombre
+            displayValue = number;
         }
         else
         {
-            displayValue += number; // Ajouter le nombre à l'affichage
+            // Ajouter le chiffre à l'affichage
+            displayValue += number;
         }
     }
 
+    // Fonction pour définir l'opération
     private void SetOperation(string operation)
     {
-        // Vérifiez si le dernier caractère de l'affichage est déjà un opérateur
+        // Vérifie que l'affichage n'est pas vide et que le dernier caractère n'est pas un opérateur
         if (!string.IsNullOrEmpty(displayValue) && !IsLastCharacterOperator())
         {
-            displayValue += " " + operation + " "; // Ajoute l'opération à l'affichage
+            // Ajoute l'opération à l'affichage
+            displayValue += " " + operation + " ";
         }
     }
 
+    // Fonction pour vérifier si le dernier caractère de l'affichage est un opérateur
     private bool IsLastCharacterOperator()
     {
-        // Vérifie si le dernier caractère est un opérateur
+        // Vérifie le dernier caractère après avoir supprimé les espaces
         var lastChar = displayValue.Trim().LastOrDefault();
         return lastChar == '+' || lastChar == '-' || lastChar == '×' || lastChar == '÷';
     }
 
+    // Fonction pour effectuer le calcul basé sur l'affichage courant
     private void Calculate()
     {
-        // Effectuer le calcul sur les nombres affichés
+        // Sépare l'affichage en parties (nombres et opérateurs)
         var parts = displayValue.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        double total = 0;
+        double total = 0; // Initialisation du total
 
-        // Initialiser la variable pour l'opérateur actuel
+        // Initialiser la variable pour l'opérateur courant
         string currentOperator = "+";
 
-        // Parcourir les parties de l'expression (nombres et opérateurs)
+        // Parcourt chaque partie de l'expression
         foreach (var part in parts)
         {
+            // Essaye de convertir la partie en nombre
             if (double.TryParse(part.Replace(",", "."), out double num))
             {
-                // Addition ou soustraction selon l'opérateur actuel
+                // Effectue l'opération en fonction de l'opérateur courant
                 if (currentOperator == "+")
                 {
-                    total += num;
+                    total += num; // Addition
                 }
                 else if (currentOperator == "-")
                 {
-                    total -= num;
+                    total -= num; // Soustraction
                 }
                 else if (currentOperator == "×")
                 {
-                    total *= num;
+                    total *= num; // Multiplication
                 }
                 else if (currentOperator == "÷")
                 {
-                    total /= num;
+                    total /= num; // Division
                 }
                 else if (currentOperator == "%")
                 {
-                    total %= num;
+                    total %= num; // Modulo
                 }
             }
             else
             {
-                // Mettre à jour l'opérateur actuel (+ ou -)
+                // Met à jour l'opérateur courant
                 currentOperator = part;
             }
         }
 
-        // Mettre à jour l'affichage avec le total
-        displayValue = total.ToString().Replace(".", ","); // Affiche le résultat final avec virgule
+        // Met à jour l'affichage avec le total calculé
+        displayValue = total.ToString().Replace(".", ","); // Affiche le résultat final avec une virgule
     }
 
+    // Fonction pour réinitialiser l'affichage et le résultat
     private void Reset()
     {
-        displayValue = "0"; // Réinitialise l'affichage
+        displayValue = "0"; // Réinitialise l'affichage à 0
         currentResult = 0; // Réinitialise le résultat courant
     }
+
+    // Fonction pour basculer le signe du nombre affiché (positif/négatif)
+    private void ToggleSign()
+    {
+        // Vérifie que l'affichage n'est pas vide et convertit en nombre
+        if (!string.IsNullOrEmpty(displayValue) && double.TryParse(displayValue.Replace(",", "."), out double number))
+        {
+            number = -number; // Change le signe
+            displayValue = number.ToString().Replace(".", ","); // Met à jour l'affichage
+        }
+    }
+
+    // Fonction pour supprimer le dernier caractère de l'affichage
+    private void DeleteLastCharacter()
+    {
+        // Vérifie que l'affichage n'est pas vide et n'est pas "0"
+        if (!string.IsNullOrEmpty(displayValue) && displayValue != "0")
+        {
+            // Retire le dernier caractère
+            if (displayValue.Length > 1)
+            {
+                displayValue = displayValue.Substring(0, displayValue.Length - 1); // Supprime le dernier caractère
+            }
+            else
+            {
+                displayValue = "0"; // Réinitialise à 0 si c'est le seul caractère
+            }
+        }
+    }
 }
+
