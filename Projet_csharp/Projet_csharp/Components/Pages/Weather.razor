@@ -5,63 +5,98 @@
 
 <h1>Weather</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>This component demonstrates showing weather data for a given city.</p>
 
-@if (forecasts == null)
+<input @bind="city" placeholder="Enter city name" />
+<button @onclick="GetWeather">Get Weather</button>
+
+@if (weatherDescription != null)
 {
-    <p>
-        <em>Loading...</em>
-    </p>
+    <h3>Météo actuelle pour @city :</h3>
+    <p>Température : @temperature °C</p>
+    <p>Conditions : @weatherDescription</p>
 }
-else
+else if (errorMessage != null)
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
-        {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <p class="text-danger">@errorMessage</p>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private string API_KEY = "e26c89711ed56d28ae9a6b0ac3506030";
+    private string city;
+    private string errorMessage;
+    private double temperature;
+    private string weatherDescription;
 
-    protected override async Task OnInitializedAsync()
+    // Méthode pour récupérer les coordonnées géographiques de la ville
+    private async Task<(double lat, double lon)> GetCoordinates(string cityName)
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        // S'assurer qu'une ville est entrée
+        if (string.IsNullOrWhiteSpace(cityName))
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            errorMessage = "Please enter a city name.";
+            return (0, 0);
+        }
+
+        string geoUrl = $"http://api.openweathermap.org/geo/1.0/direct?q={cityName}&limit=1&appid={API_KEY}";
+
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync(geoUrl);
+                response.EnsureSuccessStatusCode();
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var geoData = System.Text.Json.JsonDocument.Parse(jsonResponse);
+
+                if (geoData.RootElement.GetArrayLength() > 0)
+                {
+                    var cityData = geoData.RootElement[0];
+                    double lat = cityData.GetProperty("lat").GetDouble();
+                    double lon = cityData.GetProperty("lon").GetDouble();
+                    return (lat, lon);
+                }
+                else
+                {
+                    errorMessage = "City not found.";
+                    return (0, 0);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error fetching coordinates: {ex.Message}";
+            return (0, 0);
+        }
     }
 
-    private class WeatherForecast
+    // Méthode pour récupérer les informations météo via l'API One Call
+    private async Task GetWeather()
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
+        errorMessage = null;
+        var (lat, lon) = await GetCoordinates(city);
 
+        if (lat != 0 && lon != 0)
+        {
+            string weatherUrl = $"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric&appid={API_KEY}";
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.GetAsync(weatherUrl);
+                    response.EnsureSuccessStatusCode();
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var weatherData = System.Text.Json.JsonDocument.Parse(jsonResponse);
+
+                    temperature = weatherData.RootElement.GetProperty("current").GetProperty("temp").GetDouble();
+                    weatherDescription = weatherData.RootElement.GetProperty("current").GetProperty("weather")[0].GetProperty("description").GetString();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error retrieving weather data: {ex.Message}";
+            }
+        }
+    }
 }
