@@ -5,98 +5,26 @@
 
 <h1>Weather</h1>
 
-<p>This component demonstrates showing weather data for a given city.</p>
+<p>This component demonstrates showing data.</p>
 
-<input @bind="city" placeholder="Enter city name" />
-<button @onclick="GetWeather">Get Weather</button>
-
-@if (weatherDescription != null)
-{
-    <h3>Météo actuelle pour @city :</h3>
-    <p>Température : @temperature °C</p>
-    <p>Conditions : @weatherDescription</p>
-}
-else if (errorMessage != null)
-{
-    <p class="text-danger">@errorMessage</p>
-}
+<button>get data</button>
+@
+<h3>ville : @dataWeather.name</h3>
+<p>lat : @dataWeather.lat</p>
+<p>lon : @dataWeather.lon</p>
+<p>state : @dataWeather.state</p>
 
 @code {
+    public DataWeather dataWeather;
     private string API_KEY = "e26c89711ed56d28ae9a6b0ac3506030";
-    private string city;
-    private string errorMessage;
-    private double temperature;
-    private string weatherDescription;
 
-    // Méthode pour récupérer les coordonnées géographiques de la ville
-    private async Task<(double lat, double lon)> GetCoordinates(string cityName)
+
+    public class DataWeather
     {
-        // S'assurer qu'une ville est entrée
-        if (string.IsNullOrWhiteSpace(cityName))
-        {
-            errorMessage = "Please enter a city name.";
-            return (0, 0);
-        }
-
-        string geoUrl = $"http://api.openweathermap.org/geo/1.0/direct?q={cityName}&limit=1&appid={API_KEY}";
-
-        try
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var response = await httpClient.GetAsync(geoUrl);
-                response.EnsureSuccessStatusCode();
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var geoData = System.Text.Json.JsonDocument.Parse(jsonResponse);
-
-                if (geoData.RootElement.GetArrayLength() > 0)
-                {
-                    var cityData = geoData.RootElement[0];
-                    double lat = cityData.GetProperty("lat").GetDouble();
-                    double lon = cityData.GetProperty("lon").GetDouble();
-                    return (lat, lon);
-                }
-                else
-                {
-                    errorMessage = "City not found.";
-                    return (0, 0);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error fetching coordinates: {ex.Message}";
-            return (0, 0);
-        }
+        public string name { get; set; }
+        public float lat { get; set; }
+        public float lon { get; set; }
+        public string state { get; set; }
     }
 
-    // Méthode pour récupérer les informations météo via l'API One Call
-    private async Task GetWeather()
-    {
-        errorMessage = null;
-        var (lat, lon) = await GetCoordinates(city);
-
-        if (lat != 0 && lon != 0)
-        {
-            string weatherUrl = $"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric&appid={API_KEY}";
-
-            try
-            {
-                using (var httpClient = new HttpClient())
-                {
-                    var response = await httpClient.GetAsync(weatherUrl);
-                    response.EnsureSuccessStatusCode();
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    var weatherData = System.Text.Json.JsonDocument.Parse(jsonResponse);
-
-                    temperature = weatherData.RootElement.GetProperty("current").GetProperty("temp").GetDouble();
-                    weatherDescription = weatherData.RootElement.GetProperty("current").GetProperty("weather")[0].GetProperty("description").GetString();
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMessage = $"Error retrieving weather data: {ex.Message}";
-            }
-        }
-    }
 }
