@@ -1,23 +1,59 @@
 ﻿@page "/weather"
-@attribute [StreamRendering]
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
-
 <p>This component demonstrates showing data.</p>
+<button class="btn btn-dark" @onclick="FetchData">Get Weather Data</button>
 
-<button>get data</button>
-@
-<h3>ville : @dataWeather.name</h3>
-<p>lat : @dataWeather.lat</p>
-<p>lon : @dataWeather.lon</p>
-<p>state : @dataWeather.state</p>
+@if (dataWeather != null)
+{
+    <h3>City: @dataWeather.name</h3>
+    <p>Lat: @dataWeather.lat</p>
+    <p>Lon: @dataWeather.lon</p>
+    <p>State: @dataWeather.state</p>
+    <p>Country: @dataWeather.country</p>
+}
+else
+{
+    <p>No data available</p>
+}
 
 @code {
     public DataWeather dataWeather;
-    private string API_KEY = "e26c89711ed56d28ae9a6b0ac3506030";
 
+    public async Task FetchData()
+    {
+        // Pour le débogage, vous pouvez ajouter une alerte JavaScript
+        await JS.InvokeVoidAsync("alert", "Button clicked!"); // Alerte pour le débogage
+
+        Console.WriteLine("Button clicked, fetching data...");
+        try
+        {
+            var client = HttpClientFactory.CreateClient("WeatherAPI");
+            var response = await client.GetFromJsonAsync<List<DataWeather>>("https://api.openweathermap.org/geo/1.0/direct?q=cannes&limit=1&appid=e26c89711ed56d28ae9a6b0ac3506030");
+
+            // Affiche la réponse brute pour déboguer
+            Console.WriteLine($"Response: {response}");
+
+            if (response != null && response.Count > 0)
+            {
+                dataWeather = response[0];
+                Console.WriteLine($"Data fetched: {dataWeather.name}, {dataWeather.lat}, {dataWeather.lon}, {dataWeather.state}, {dataWeather.country}");
+            }
+            else
+            {
+                Console.WriteLine("No data returned from API.");
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
 
     public class DataWeather
     {
@@ -25,6 +61,6 @@
         public float lat { get; set; }
         public float lon { get; set; }
         public string state { get; set; }
+        public string country { get; set; }
     }
-
 }
