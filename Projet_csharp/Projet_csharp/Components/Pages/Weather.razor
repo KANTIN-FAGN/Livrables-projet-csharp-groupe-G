@@ -5,44 +5,123 @@
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
-<p>This component demonstrates showing data.</p>
-<button class="btn btn-dark" @onclick="FetchData">Get Weather Data</button>
+<div class="d-flex flex-column w-100 align-items-center">
+    <h1>Weather</h1>
+    <div class="d-flex w-50 pt-3">
+        <input type="text" class="form-control" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px" @bind="city" placeholder="Rechercher un ville" aria-label="Rechercher un ville" aria-describedby="button-addon2">
+        <button class="btn btn-dark" type="submit" style="border-bottom-left-radius: 0px; border-top-left-radius: 0px" @onclick="FetchData">Rechercher</button>
+    </div>
+</div>
 
 @if (dataWeather != null)
 {
-    <h3>City: @dataWeather.name</h3>
-    <p>Lat: @dataWeather.lat</p>
-    <p>Lon: @dataWeather.lon</p>
-    <p>State: @dataWeather.state</p>
-    <p>Country: @dataWeather.country</p>
+    <div id="weatherCarousel" class="carousel slide m-5" data-mdb-ride="carousel" data-mdb-carousel-init>
+        <div class="rounded-3 d-flex flex-column gap-4">
+            <div class="shadow" style="border-radius: 15px">
+                <div class="d-flex justify-content-between align-items-center px-5 @(dataWeather.current.dt < dataWeather.current.sunset && dataWeather.current.dt > dataWeather.current.sunrise ? "gradient-day text-dark" : "gradient-night text-light")" style="height: 230px; border-radius: 15px">
+                    <div>
+                        <h2 class="text-dark display-2">
+                            <strong>@RoundTemperature(dataWeather?.current?.temp ?? 0)°C</strong>
+                        </h2>
+                        <p class="text-dark mb-0">@dataAPI.name, @dataAPI.country</p>
+                        <p class="text-dark mb-0">@ConvertUnixTimeToHour(dataWeather.current.dt, dataWeather.timezone_offset) h</p>
+                    </div>
+                    <div style="width: 150px">
+                        @if (@dataWeather.current.dt < @dataWeather.current.sunset && @dataWeather.current.dt > @dataWeather.current.sunrise)
+                        {
+                            @if (@dataWeather.current.weather[0].main == "Clear")
+                            {
+                                <i class="bi bi-brightness-high" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Clouds")
+                            {
+                                <i class="bi bi-clouds" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Rain")
+                            {
+                                <i class="bi bi-cloud-rain" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Snow")
+                            {
+                                <i class="bi bi-snow snow" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Thunderstorm")
+                            {
+                                <i class="bi bi-cloud-lightning-rain" style="font-size: 150px;"></i>
+                            }
+                        }
+                        else if (@dataWeather.current.dt > @dataWeather.current.sunset || @dataWeather.current.dt < @dataWeather.current.sunrise)
+                        {
+                            @if (@dataWeather.current.weather[0].main == "Clear")
+                            {
+                                <i class="bi bi-moon" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Clouds")
+                            {
+                                <i class="bi bi-clouds" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Rain")
+                            {
+                                <i class="bi bi-cloud-rain" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Snow")
+                            {
+                                <i class="bi bi-snow" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.weather[0].main == "Thunderstorm")
+                            {
+                                <i class="bi bi-cloud-lightning-rain" style="font-size: 150px;"></i>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="bg-light shadow" style="border-radius: 15px">
+                <div class="d-flex justify-content-around text-center align-items-center px-5 bg-body-tertiary"
+                     style="height: 230px">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        <div class="flex-column">
+                            <p class="small" style="margin-bottom: 0 !important;">
+                                <strong>@ConvertUnixTimeToHour(dataWeather?.hourly?[i + 1]?.dt ?? 0, dataWeather.timezone_offset) h</strong>
+                            </p>
+                            <i class="@GetWeatherIcon(dataWeather?.hourly?[i]?.weather[0]?.main, IsDaytime(dataWeather?.hourly?[i]?.dt ?? 0))"
+                               style="font-size: 25px;">
+                            </i>
+                            <p class="mb-0">
+                                <strong>@RoundTemperature(dataWeather?.hourly?[i]?.temp ?? 0)°C</strong>
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 }
 else
 {
-    <p>No data available</p>
+    <div class="d-flex flex-column w-100 align-items-center pt-5">
+        <p class="text-dark">Veuillez entrer une ville et appuyer sur le bouton rechercher.</p>
+    </div>
 }
 
 @code {
+    private string API_KEY = "e26c89711ed56d28ae9a6b0ac3506030";
+    private string city;
+    public DataAPI dataAPI;
     public DataWeather dataWeather;
 
     public async Task FetchData()
     {
-        // Pour le débogage, vous pouvez ajouter une alerte JavaScript
-        await JS.InvokeVoidAsync("alert", "Button clicked!"); // Alerte pour le débogage
-
-        Console.WriteLine("Button clicked, fetching data...");
         try
         {
             var client = HttpClientFactory.CreateClient("WeatherAPI");
-            var response = await client.GetFromJsonAsync<List<DataWeather>>("https://api.openweathermap.org/geo/1.0/direct?q=cannes&limit=1&appid=e26c89711ed56d28ae9a6b0ac3506030");
-
-            // Affiche la réponse brute pour déboguer
-            Console.WriteLine($"Response: {response}");
+            var response = await client.GetFromJsonAsync<List<DataAPI>>($"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid=" + API_KEY);
 
             if (response != null && response.Count > 0)
             {
-                dataWeather = response[0];
-                Console.WriteLine($"Data fetched: {dataWeather.name}, {dataWeather.lat}, {dataWeather.lon}, {dataWeather.state}, {dataWeather.country}");
+                dataAPI = response[0];
+                await GetTimezone(dataAPI.lon, dataAPI.lat);
             }
             else
             {
@@ -55,12 +134,113 @@ else
         }
     }
 
-    public class DataWeather
+    public async Task GetTimezone(float lon, float lat)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("WeatherAPI");
+            var response = await client.GetFromJsonAsync<DataWeather>($"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric&appid=" + API_KEY);
+
+            if (response != null)
+            {
+                dataWeather = response;
+            }
+            else
+            {
+                Console.WriteLine("No timezone data returned from API.");
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error fetching timezone data: {ex.Message}");
+        }
+    }
+
+    public string ConvertUnixTimeToHour(long unixTime, int timezoneOffset)
+    {
+        DateTime utcDateTime = DateTimeOffset.FromUnixTimeSeconds(unixTime).UtcDateTime;
+        DateTime localDateTime = utcDateTime.AddSeconds(timezoneOffset);
+        return localDateTime.ToString("HH");
+    }
+
+    public string RoundTemperature(double temp)
+    {
+        return Math.Round(temp).ToString();
+    }
+
+    private string GetWeatherIcon(string weatherMain, bool isDay)
+    {
+        return weatherMain switch
+        {
+            "Clear" => isDay ? "bi bi-brightness-high" : "bi bi-moon",
+            "Clouds" => "bi bi-clouds",
+            "Rain" => "bi bi-cloud-rain",
+            "Snow" => "bi bi-snow",
+            "Thunderstorm" => "bi bi-cloud-lightning-rain",
+            _ => "bi bi-question-circle" // Icône par défaut si non trouvé
+        };
+    }
+
+    private bool IsDaytime(long dt)
+    {
+        return dt < dataWeather.current.sunset && dt > dataWeather.current.sunrise;
+    }
+
+    public class DataAPI
     {
         public string name { get; set; }
         public float lat { get; set; }
         public float lon { get; set; }
-        public string state { get; set; }
         public string country { get; set; }
     }
+
+    public class DataWeather
+    {
+        public Current current { get; set; }
+        public int timezone_offset { get; set; }
+        public List<Hourly> hourly { get; set; }
+    }
+
+    public class Current
+    {
+        public long dt { get; set; }
+        public long sunrise { get; set; }
+        public long sunset { get; set; }
+        public double temp { get; set; }
+        public double feels_like { get; set; }
+        public int pressure { get; set; }
+        public int humidity { get; set; }
+        public double dew_point { get; set; }
+        public double uvi { get; set; } // Change int to double
+        public int clouds { get; set; }
+        public int visibility { get; set; }
+        public double wind_speed { get; set; }
+        public int wind_deg { get; set; }
+        public List<CurrentLstWeather> weather { get; set; }
+    }
+
+
+    public class CurrentLstWeather
+    {
+        public int id { get; set; }
+        public string main { get; set; }
+        public string description { get; set; }
+        public string icon { get; set; }
+    }
+
+    public class Hourly
+    {
+        public long dt { get; set; }
+        public double temp { get; set; }
+        public List<HourlyWeather> weather { get; set; }
+    }
+
+    public class HourlyWeather
+    {
+        public int id { get; set; }
+        public string main { get; set; }
+        public string description { get; set; }
+        public string icon { get; set; }
+    }
+
 }
