@@ -1,3 +1,153 @@
 @page "/quiz"
-<h3>Quiz</h3>
-<p>Ceci est la page du quiz.</p>
+
+<PageTitle>Quiz Champion</PageTitle>
+
+<div class="container mt-5">
+    @if (string.IsNullOrEmpty(UserName))
+    {
+        <!-- Écran de saisie du prénom et nom -->
+        <div class="card p-4">
+            <h2 class="text-center">Bienvenue au Quiz Champion</h2>
+            <p class="text-center">Veuillez entrer votre prénom et nom pour commencer</p>
+            <input @bind="UserName" class="form-control" placeholder="Prénom Nom" />
+            <button class="btn btn-primary mt-3 w-100" @onclick="StartQuiz">Commencer le quiz</button>
+        </div>
+    }
+    else if (!QuizCompleted)
+    {
+        <!-- Écran du quiz -->
+        <div class="card p-4">
+            <h3>Question @currentQuestionIndex + 1</h3>
+            <p>@questions[currentQuestionIndex].Text</p>
+
+            @foreach (var option in questions[currentQuestionIndex].Options)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="question" value="@option" @onchange="() => SelectAnswer(option)" />
+                    <label class="form-check-label">@option</label>
+                </div>
+            }
+
+            <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
+        </div>
+
+        <!-- Affichage du palier -->
+        <div class="mt-3">
+            <h4>Palier actuel : @palier €</h4>
+        </div>
+    }
+    else
+    {
+        <!-- Résultats finaux et score -->
+        <div class="card p-4">
+            <h2>Félicitations @UserName!</h2>
+            <p>Vous avez complété le quiz et atteint le palier de : @palier €</p>
+
+            <h3>Classement</h3>
+            <ul class="list-group">
+                @foreach (var player in leaderboard)
+                {
+                    <li class="list-group-item">
+                        <strong>@player.Name :</strong> @player.Score €
+                    </li>
+                }
+            </ul>
+
+            <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
+        </div>
+    }
+</div>
+
+@code {
+    private string UserName;
+    private int currentQuestionIndex = 0;
+    private int palier = 0;
+    private bool QuizCompleted = false;
+    private string selectedAnswer = null; // Stocke la réponse sélectionnée
+    private bool isNextDisabled = true; // Désactive le bouton suivant tant qu'une réponse n'est pas sélectionnée
+
+    // Classement
+    private List<Player> leaderboard = new List<Player>();
+
+    // Liste de paliers comme "Qui veut gagner des millions ?"
+    private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
+
+    // Liste de questions et réponses avec paliers
+    private List<Question> questions = new List<Question>
+    {
+        new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris", PalierGain = 500 },
+        new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique", PalierGain = 1000 },
+        new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci", PalierGain = 2000 },
+        new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8", PalierGain = 4000 },
+        new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo", PalierGain = 8000 },
+        // Ajoute plus de questions si nécessaire
+    };
+
+    private void StartQuiz()
+    {
+        // Initialisation du quiz
+        currentQuestionIndex = 0;
+        palier = 0;
+        QuizCompleted = false;
+        selectedAnswer = null;
+        isNextDisabled = true; // Désactiver le bouton tant qu'une réponse n'est pas sélectionnée
+    }
+
+    private void SelectAnswer(string option)
+    {
+        // Stocker la réponse sélectionnée et activer le bouton suivant
+        selectedAnswer = option;
+        isNextDisabled = false;
+    }
+
+    private void GoToNextQuestion()
+    {
+        // Vérifier si la réponse sélectionnée est correcte
+        if (selectedAnswer == questions[currentQuestionIndex].CorrectAnswer)
+        {
+            palier += questions[currentQuestionIndex].PalierGain;
+        }
+
+        // Passer à la question suivante ou terminer le quiz
+        if (currentQuestionIndex < questions.Count - 1)
+        {
+            currentQuestionIndex++;
+            selectedAnswer = null; // Réinitialiser la réponse sélectionnée
+            isNextDisabled = true; // Désactiver le bouton suivant jusqu'à la sélection d'une réponse
+        }
+        else
+        {
+            QuizCompleted = true;
+            UpdateLeaderboard(); // Mettre à jour le classement
+        }
+    }
+
+    private void UpdateLeaderboard()
+    {
+        // Ajouter le joueur au classement avec son score actuel
+        leaderboard.Add(new Player { Name = UserName, Score = palier });
+        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList(); // Garder les 10 meilleurs scores
+    }
+
+    private void RestartQuiz()
+    {
+        UserName = "";
+        StartQuiz();
+    }
+
+    // Classe pour représenter une question avec ses options et son palier
+    public class Question
+    {
+        public string Text { get; set; }
+        public List<string> Options { get; set; }
+        public string CorrectAnswer { get; set; }
+        public int PalierGain { get; set; }
+    }
+
+    // Classe pour représenter un joueur dans le classement
+    public class Player
+    {
+        public string Name { get; set; }
+        public int Score { get; set; }
+    }
+}
