@@ -49,6 +49,14 @@
                             {
                                 <i class="bi bi-cloud-lightning-rain" style="font-size: 150px;"></i>
                             }
+                            else if (@dataWeather.current.dt == @dataWeather.current.sunset)
+                            {
+                                <i class="bi bi-sunrise" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.dt == @dataWeather.current.sunrise)
+                            {
+                                <i class="bi bi-sunset" style="font-size: 150px;"></i>
+                            }
                         }
                         else if (@dataWeather.current.dt > @dataWeather.current.sunset || @dataWeather.current.dt < @dataWeather.current.sunrise)
                         {
@@ -58,7 +66,7 @@
                             }
                             else if (@dataWeather.current.weather[0].main == "Clouds")
                             {
-                                <i class="bi bi-clouds" style="font-size: 150px;"></i>
+                                <i class="bi bi-cloud-moon" style="font-size: 150px;"></i>
                             }
                             else if (@dataWeather.current.weather[0].main == "Rain")
                             {
@@ -71,6 +79,14 @@
                             else if (@dataWeather.current.weather[0].main == "Thunderstorm")
                             {
                                 <i class="bi bi-cloud-lightning-rain" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.dt == @dataWeather.current.sunset)
+                            {
+                                <i class="bi bi-sunrise" style="font-size: 150px;"></i>
+                            }
+                            else if (@dataWeather.current.dt == @dataWeather.current.sunrise)
+                            {
+                                <i class="bi bi-sunset" style="font-size: 150px;"></i>
                             }
                         }
                     </div>
