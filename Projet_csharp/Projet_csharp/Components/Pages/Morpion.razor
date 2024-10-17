@@ -1,0 +1,129 @@
+﻿@page "/morpion"
+@rendermode InteractiveServer
+
+<PageTitle>Morpion</PageTitle>
+
+<div class="w-100 d-flex justify-content-center">
+    <h1>Morpion</h1>
+</div>
+
+@if (!gameStarted)
+{
+    <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+        <div class="d-flex flex-column gap-4">
+            <h4>Choisissez un mode de jeu :</h4>
+            <div class="d-flex flex-row justify-content-between">
+                <button class="btn btn-primary" @onclick="StartLocalGame">Jouer en local</button>
+                <button class="btn btn-primary">Jouer contre IA</button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <section class="d-flex flex-column w-100 align-items-center pt-5">
+        <div class="pb-3">
+            <button class="btn btn-secondary shadow border-3" @onclick="ResetGame">Recommencer</button>
+        </div>
+        <div class="d-flex shadow">
+            <div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(1, 1))">@(RenderButtonContent(1, 1))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(2, 1))">@(RenderButtonContent(2, 1))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-right: 1px solid black" @onclick="@(() => OnButtonClick(3, 1))">@(RenderButtonContent(3, 1))</button>
+                </div>
+            </div>
+            <div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px;" @onclick="@(() => OnButtonClick(1, 2))">@(RenderButtonContent(1, 2))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 2))">@(RenderButtonContent(2, 2))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-right: 1px solid black; border-bottom-right-radius: 0px; border-top-right-radius: 0px" @onclick="@(() => OnButtonClick(3, 2))">@(RenderButtonContent(3, 2))</button>
+                </div>
+            </div>
+            <div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px" @onclick="@(() => OnButtonClick(1, 3))">@(RenderButtonContent(1, 3))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 3))">@(RenderButtonContent(2, 3))</button>
+                </div>
+                <div style="width: 150px; height: 150px;">
+                    <button class="btn btn-light h-100 w-100" @onclick="@(() => OnButtonClick(3, 3))">@(RenderButtonContent(3, 3))</button>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+
+// Indicateur si le jeu a commencé ou non
+    private bool gameStarted = false;
+
+// Tableau pour suivre l'état des boutons (vide, 'X' ou 'O')
+    private string[][] buttons = new string[][]
+    {
+        new string[] { "", "", "" },
+        new string[] { "", "", "" },
+        new string[] { "", "", "" }
+    };
+
+// Variable pour suivre le joueur actuel (true pour X, false pour O)
+    private bool isXTurn = true;
+
+// Méthode pour démarrer une partie en local
+    private void StartLocalGame()
+    {
+        gameStarted = true;
+        ResetGame();
+    }
+
+// Réinitialiser le jeu
+    private void ResetGame()
+    {
+        buttons = new string[][]
+        {
+            new string[] { "", "", "" },
+            new string[] { "", "", "" },
+            new string[] { "", "", "" }
+        };
+        isXTurn = true;
+    }
+
+// Méthode pour gérer les clics sur les boutons
+    private void OnButtonClick(int row, int col)
+    {
+        if (buttons[row - 1][col - 1] == "")
+        {
+            buttons[row - 1][col - 1] = isXTurn ? "X" : "O";
+
+            isXTurn = !isXTurn;
+
+            StateHasChanged();
+        }
+    }
+    private RenderFragment RenderButtonContent(int row, int col)
+    {
+        string content = buttons[row - 1][col - 1];
+        if (content == "X")
+        {
+            return __builder => __builder.AddMarkupContent(0, "<img width='60%' src='croix.png' />");
+        }
+        else if (content == "O")
+        {
+            return __builder => __builder.AddMarkupContent(0, "<img width='60%' src='cercle.png' />");
+        }
+        else
+        {
+            return __builder => __builder.AddContent(0, "");
+        }
+    }
+}
