@@ -22,45 +22,47 @@
 else
 {
     <section class="d-flex flex-column w-100 align-items-center pt-5">
-        <div class="pb-3">
-            <button class="btn btn-secondary shadow border-3" @onclick="ResetGame">Recommencer</button>
+        <div>
+            <div class="pb-3 d-flex flex-row justify-content-between">
+                <button class="btn btn-secondary shadow border-3" @onclick="ResetGame">Recommencer</button>
+                <button class="btn btn-secondary shadow border-3" @onclick="() => gameStarted = false">Retour</button>
+            </div>
+            <div class="d-flex shadow">
+                <div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(1, 1))">@(RenderButtonContent(1, 1))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(2, 1))">@(RenderButtonContent(2, 1))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-right: 1px solid black" @onclick="@(() => OnButtonClick(3, 1))">@(RenderButtonContent(3, 1))</button>
+                    </div>
+                </div>
+                <div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px;" @onclick="@(() => OnButtonClick(1, 2))">@(RenderButtonContent(1, 2))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 2))">@(RenderButtonContent(2, 2))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-right: 1px solid black; border-bottom-right-radius: 0px; border-top-right-radius: 0px" @onclick="@(() => OnButtonClick(3, 2))">@(RenderButtonContent(3, 2))</button>
+                    </div>
+                </div>
+                <div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px" @onclick="@(() => OnButtonClick(1, 3))">@(RenderButtonContent(1, 3))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 3))">@(RenderButtonContent(2, 3))</button>
+                    </div>
+                    <div style="width: 150px; height: 150px;">
+                        <button class="btn btn-light h-100 w-100" @onclick="@(() => OnButtonClick(3, 3))">@(RenderButtonContent(3, 3))</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="d-flex shadow">
-            <div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(1, 1))">@(RenderButtonContent(1, 1))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-radius: 0px; border-right: 1px solid black; border-bottom: 1px solid black" @onclick="@(() => OnButtonClick(2, 1))">@(RenderButtonContent(2, 1))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom-right-radius: 0px; border-top-right-radius: 0px; border-right: 1px solid black" @onclick="@(() => OnButtonClick(3, 1))">@(RenderButtonContent(3, 1))</button>
-                </div>
-            </div>
-            <div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px;" @onclick="@(() => OnButtonClick(1, 2))">@(RenderButtonContent(1, 2))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-right: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 2))">@(RenderButtonContent(2, 2))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-right: 1px solid black; border-bottom-right-radius: 0px; border-top-right-radius: 0px" @onclick="@(() => OnButtonClick(3, 2))">@(RenderButtonContent(3, 2))</button>
-                </div>
-            </div>
-            <div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px" @onclick="@(() => OnButtonClick(1, 3))">@(RenderButtonContent(1, 3))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" style="border-bottom: 1px solid black; border-radius: 0px" @onclick="@(() => OnButtonClick(2, 3))">@(RenderButtonContent(2, 3))</button>
-                </div>
-                <div style="width: 150px; height: 150px;">
-                    <button class="btn btn-light h-100 w-100" @onclick="@(() => OnButtonClick(3, 3))">@(RenderButtonContent(3, 3))</button>
-                </div>
-            </div>
-        </div>
-
         @if (gameOver)
         {
             <div class="alert alert-info text-center mt-3">
