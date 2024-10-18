@@ -97,6 +97,42 @@ else
         };
         isXTurn = true;
     }
+    
+    private void CheckWin()
+    {
+        // Check rows
+        for (int i = 0; i < 3; i++)
+        {
+            if (buttons[i][0] == buttons[i][1] && buttons[i][1] == buttons[i][2] && buttons[i][0] != "")
+            {
+                // Win
+                Console.WriteLine("Win");
+            }
+        }
+
+        // Check columns
+        for (int i = 0; i < 3; i++)
+        {
+            if (buttons[0][i] == buttons[1][i] && buttons[1][i] == buttons[2][i] && buttons[0][i] != "")
+            {
+                // Win
+                Console.WriteLine("Win");
+            }
+        }
+
+        // Check diagonals
+        if (buttons[0][0] == buttons[1][1] && buttons[1][1] == buttons[2][2] && buttons[0][0] != "")
+        {
+            // Win
+            Console.WriteLine("Win");
+        }
+
+        if (buttons[0][2] == buttons[1][1] && buttons[1][1] == buttons[2][0] && buttons[0][2] != "")
+        {
+            // Win
+            Console.WriteLine("Win");
+        }
+    }
 
 // Méthode pour gérer les clics sur les boutons
     private void OnButtonClick(int row, int col)
@@ -106,10 +142,13 @@ else
             buttons[row - 1][col - 1] = isXTurn ? "X" : "O";
 
             isXTurn = !isXTurn;
+            
+            CheckWin();
 
             StateHasChanged();
         }
     }
+    
     private RenderFragment RenderButtonContent(int row, int col)
     {
         string content = buttons[row - 1][col - 1];
