@@ -1,78 +1,77 @@
 @page "/quiz"
+@rendermode InteractiveServer
 
 <PageTitle>Quiz Champion</PageTitle>
 
-<div class="container mt-5">
-    @if (string.IsNullOrEmpty(UserName))
-    {
-        <!-- Écran de saisie du prénom et nom -->
-        <div class="card p-4">
-            <h2 class="text-center">Bienvenue au Quiz Champion</h2>
-            <p class="text-center">Veuillez entrer votre prénom et nom pour commencer</p>
-            <input @bind="UserName" class="form-control" placeholder="Prénom Nom" />
-            <button class="btn btn-primary mt-3 w-100" @onclick="StartQuiz">Commencer le quiz</button>
-        </div>
-    }
-    else if (!QuizCompleted)
-    {
-        <!-- Écran du quiz -->
-        <div class="card p-4">
-            <h3>Question @currentQuestionIndex + 1</h3>
-            <p>@questions[currentQuestionIndex].Text</p>
-
-            @foreach (var option in questions[currentQuestionIndex].Options)
-            {
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="question" value="@option" @onchange="() => SelectAnswer(option)" />
-                    <label class="form-check-label">@option</label>
-                </div>
-            }
-
-            <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
-        </div>
-
-        <!-- Affichage du palier -->
-        <div class="mt-3">
-            <h4>Palier actuel : @palier €</h4>
-        </div>
-    }
-    else
-    {
-        <!-- Résultats finaux et score -->
-        <div class="card p-4">
-            <h2>Félicitations @UserName!</h2>
-            <p>Vous avez complété le quiz et atteint le palier de : @palier €</p>
-
-            <h3>Classement</h3>
-            <ul class="list-group">
-                @foreach (var player in leaderboard)
-                {
-                    <li class="list-group-item">
-                        <strong>@player.Name :</strong> @player.Score €
-                    </li>
-                }
-            </ul>
-
-            <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
-        </div>
-    }
+<div class="w-100 d-flex justify-content-center">
+    <h1>Quiz Champion</h1>
 </div>
 
+@if (string.IsNullOrEmpty(UserName))
+{
+    <!-- USERNAME INPUT SCREEN -->
+    <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+        <div class="d-flex flex-column gap-4">
+            <h4>Veuillez entrer votre nom :</h4>
+            <InputText @bind-Value="UserName" class="form-control" placeholder="Prénom Nom" />
+            <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
+            @if (showErrorMessage)
+            {
+                <p class="text-danger">Veuillez entrer un nom valide pour commencer.</p>
+            }
+        </div>
+    </div>
+}
+else if (!QuizCompleted)
+{
+    <!-- QUIZ SCREEN -->
+    <section class="d-flex flex-column w-100 align-items-center pt-5">
+        <h3>Question @(currentQuestionIndex + 1)</h3>
+        <p>@questions[currentQuestionIndex].Text</p>
+
+        @foreach (var option in questions[currentQuestionIndex].Options)
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" @onchange="() => SelectAnswer(option)" />
+                <label class="form-check-label">@option</label>
+            </div>
+        }
+
+        <button class="btn btn-secondary" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
+    </section>
+}
+else
+{
+    <!-- RESULTS SCREEN -->
+    <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
+        <h2>Félicitations @UserName!</h2>
+        <p>Vous avez complété le quiz avec un palier de : @palier €</p>
+
+        <h3>Classement</h3>
+        <ul class="list-group">
+            @foreach (var player in leaderboard)
+            {
+                <li class="list-group-item">
+                    <strong>@player.Name :</strong> @player.Score €
+                </li>
+            }
+        </ul>
+
+        <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
+    </div>
+}
+
 @code {
-    private string UserName;
+    private string UserName = "";
     private int currentQuestionIndex = 0;
     private int palier = 0;
     private bool QuizCompleted = false;
-    private string selectedAnswer = null; // Stocke la réponse sélectionnée
-    private bool isNextDisabled = true; // Désactive le bouton suivant tant qu'une réponse n'est pas sélectionnée
+    private string selectedAnswer = null;
+    private bool isNextDisabled = true;
+    private bool showErrorMessage = false; // Corrected to use this instead of 'gameStarted'
 
-    // Classement
     private List<Player> leaderboard = new List<Player>();
 
-    // Liste de paliers comme "Qui veut gagner des millions ?"
-    private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
-
-    // Liste de questions et réponses avec paliers
     private List<Question> questions = new List<Question>
     {
         new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris", PalierGain = 500 },
@@ -80,62 +79,68 @@
         new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci", PalierGain = 2000 },
         new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8", PalierGain = 4000 },
         new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo", PalierGain = 8000 },
-        // Ajoute plus de questions si nécessaire
+        // Add more questions if necessary
     };
 
     private void StartQuiz()
     {
-        // Initialisation du quiz
-        currentQuestionIndex = 0;
-        palier = 0;
-        QuizCompleted = false;
-        selectedAnswer = null;
-        isNextDisabled = true; // Désactiver le bouton tant qu'une réponse n'est pas sélectionnée
+        if (string.IsNullOrWhiteSpace(UserName))
+        {
+            showErrorMessage = true; // Show error if username is empty
+        }
+        else
+        {
+            currentQuestionIndex = 0;
+            palier = 0;
+            QuizCompleted = false;
+            selectedAnswer = null;
+            isNextDisabled = true; // Disable next button until answer is selected
+            showErrorMessage = false; // Hide error message
+            StateHasChanged(); // Refresh UI
+        }
     }
 
     private void SelectAnswer(string option)
     {
-        // Stocker la réponse sélectionnée et activer le bouton suivant
         selectedAnswer = option;
-        isNextDisabled = false;
+        isNextDisabled = false; // Enable next button
     }
 
     private void GoToNextQuestion()
     {
-        // Vérifier si la réponse sélectionnée est correcte
         if (selectedAnswer == questions[currentQuestionIndex].CorrectAnswer)
         {
             palier += questions[currentQuestionIndex].PalierGain;
         }
 
-        // Passer à la question suivante ou terminer le quiz
         if (currentQuestionIndex < questions.Count - 1)
         {
             currentQuestionIndex++;
-            selectedAnswer = null; // Réinitialiser la réponse sélectionnée
-            isNextDisabled = true; // Désactiver le bouton suivant jusqu'à la sélection d'une réponse
+            selectedAnswer = null; // Reset selected answer
+            isNextDisabled = true; // Disable next button until answer is selected
         }
         else
         {
             QuizCompleted = true;
-            UpdateLeaderboard(); // Mettre à jour le classement
+            UpdateLeaderboard();
         }
+
+        StateHasChanged(); // Refresh UI
     }
 
     private void UpdateLeaderboard()
     {
-        // Ajouter le joueur au classement avec son score actuel
         leaderboard.Add(new Player { Name = UserName, Score = palier });
-        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList(); // Garder les 10 meilleurs scores
+        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList(); // Keep top 10 scores
     }
 
     private void RestartQuiz()
     {
-        UserName = "";
+        UserName = string.Empty; // Reset username
         StartQuiz();
     }
 
-    // Classe pour représenter une question avec ses options et son palier
+    // Class to represent a question
     public class Question
     {
         public string Text { get; set; }
@@ -144,7 +149,7 @@
         public int PalierGain { get; set; }
     }
 
-    // Classe pour représenter un joueur dans le classement
+    // Class to represent a player in the leaderboard
     public class Player
     {
         public string Name { get; set; }
