@@ -2,6 +2,7 @@
     "questions": [
       {
         "id": 1,
+        "theme": "Global",
         "difficulty": "easy",
         "question": "Quelle est la couleur du ciel par temps clair ?",
         "options": ["Bleu", "Rouge", "Vert", "Jaune"],
@@ -9,6 +10,7 @@
       },
       {
         "id": 2,
+        "theme": "Global",
         "difficulty": "easy",
         "question": "Quel est le plus grand continent ?",
         "options": ["Asie", "Afrique", "Europe", "Amérique du Nord"],
@@ -16,6 +18,7 @@
       },
       {
         "id": 3,
+        "theme": "Global",
         "difficulty": "medium",
         "question": "Qui a peint la Joconde ?",
         "options": ["Leonard de Vinci", "Pablo Picasso", "Vincent van Gogh", "Michel-Ange"],
@@ -23,6 +26,7 @@
       },
       {
         "id": 4,
+        "theme": "Global",
         "difficulty": "medium",
         "question": "Quel est le plus grand océan sur Terre ?",
         "options": ["Pacifique", "Atlantique", "Indien", "Arctique"],
@@ -30,6 +34,7 @@
       },
       {
         "id": 5,
+        "theme": "Global",
         "difficulty": "medium",
         "question": "Qui a découvert la pénicilline ?",
         "options": ["Alexander Fleming", "Marie Curie", "Louis Pasteur", "Gregor Mendel"],
@@ -37,6 +42,7 @@
       },
       {
         "id": 6,
+        "theme": "Global",
         "difficulty": "hard",
         "question": "En quelle année l'homme a-t-il marché sur la lune pour la première fois ?",
         "options": ["1969", "1975", "1965", "1972"],
@@ -44,6 +50,7 @@
       },
       {
         "id": 7,
+        "theme": "Global",
         "difficulty": "hard",
         "question": "Quel est l'élément chimique représenté par le symbole 'Fe' ?",
         "options": ["Fer", "Plomb", "Argent", "Zinc"],
@@ -51,6 +58,7 @@
       },
       {
         "id": 8,
+        "theme": "Global",
         "difficulty": "hard",
         "question": "Qui est l'auteur de 'Les Misérables' ?",
         "options": ["Victor Hugo", "Émile Zola", "Charles Baudelaire", "Albert Camus"],
@@ -58,6 +66,7 @@
       },
       {
         "id": 9,
+        "theme": "Global",
         "difficulty": "very_hard",
         "question": "Quel est le nombre total d'os dans le corps humain adulte ?",
         "options": ["206", "210", "195", "214"],
@@ -65,6 +74,7 @@
       },
       {
         "id": 10,
+        "theme": "Global",
         "difficulty": "very_hard",
         "question": "Quel est le plus long fleuve du monde ?",
         "options": ["Amazone", "Nil", "Yangtsé", "Mississippi"],
@@ -72,6 +82,7 @@
       },
       {
         "id": 11,
+        "theme": "Global",
         "difficulty": "extreme",
         "question": "En quelle année le Titanic a-t-il coulé ?",
         "options": ["1912", "1905", "1915", "1920"],
@@ -79,6 +90,7 @@
       },
       {
         "id": 12,
+        "theme": "Global",
         "difficulty": "extreme",
         "question": "Quel est le nom de la plus haute montagne du Japon ?",
         "options": ["Mont Fuji", "Mont Aso", "Mont Hotaka", "Mont Tate"],
@@ -86,6 +98,7 @@
       },
       {
         "id": 13,
+        "theme": "Global",
         "difficulty": "impossible",
         "question": "Qui a gagné le prix Nobel de la paix en 1989 ?",
         "options": ["Le Dalaï-Lama", "Mère Teresa", "Nelson Mandela", "Yasser Arafat"],
@@ -93,6 +106,7 @@
       },
       {
         "id": 14,
+        "theme": "Global",
         "difficulty": "impossible",
         "question": "Combien de satellites naturels orbite autour de Jupiter ?",
         "options": ["79", "62", "89", "53"],
@@ -100,6 +114,7 @@
       },
       {
         "id": 15,
+        "theme": "Global",
         "difficulty": "impossible",
         "question": "Quel est le diamètre exact de la Terre en kilomètres ?",
         "options": ["12,742", "13,000", "12,500", "12,900"],
