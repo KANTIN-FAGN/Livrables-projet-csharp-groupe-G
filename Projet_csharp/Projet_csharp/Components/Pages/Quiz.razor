@@ -18,7 +18,7 @@
             <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
                 <div class="d-flex flex-column gap-4">
                     <h4>Veuillez entrer votre nom de candidat :</h4>
-                    <InputText @bind-Value="UserName" class="form-control" placeholder="Prénom Nom" @onkeydown="@(e => HandleKeyPress(e))" />
+                    <InputText @bind-Value="UserName" class="form-control" placeholder="Nom De Candidat ..." @onkeydown="@(e => HandleKeyPress(e))" />
                     <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
                     @if (showErrorMessage)
                     {
