@@ -5,178 +5,258 @@
 
 <PageTitle>Quiz Champion</PageTitle>
 
-<div class="w-100 d-flex justify-content-center">
-    <h1>Quiz Champion</h1>
-</div>
-
-@if (string.IsNullOrEmpty(UserName))
-{
-    <!-- Écran de saisie du nom d'utilisateur -->
-    <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
-        <div class="d-flex flex-column gap-4">
-            <h4>Veuillez entrer votre nom :</h4>
-            <InputText @bind-Value="UserName" class="form-control" placeholder="Prénom Nom" @onkeydown="HandleKeyPress" />
-            <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
-            @if (showErrorMessage)
-            {
-                <p class="text-danger">Veuillez entrer un nom valide pour commencer.</p>
-            }
+<div class="container d-flex">
+    <!-- Section pour le contenu principal (questions, boutons, etc.) -->
+    <div class="w-75">
+        <div class="w-100 d-flex justify-content-center">
+            <h1>Quiz Champion</h1>
         </div>
-    </div>
-}
-else if (!QuizCompleted)
-{
-    <!-- Écran du quiz -->
-    <section class="d-flex flex-column w-100 align-items-center pt-5">
-        <h3>Question @(currentQuestionIndex + 1)</h3>
-        <p>@questions[currentQuestionIndex].Text</p>
 
-        @foreach (var option in questions[currentQuestionIndex].Options)
+        @if (string.IsNullOrEmpty(UserName))
         {
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" @onchange="() => SelectAnswer(option)" checked="@((selectedAnswer == option) ? true : false)" />
-                <label class="form-check-label">@option</label>
+            <!-- Écran de saisie du nom d'utilisateur -->
+            <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+                <div class="d-flex flex-column gap-4">
+                    <h4>Veuillez entrer votre nom de candidat :</h4>
+                    <InputText @bind-Value="UserName" class="form-control" placeholder="Prénom Nom" @onkeydown="@(e => HandleKeyPress(e))" />
+                    <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
+                    @if (showErrorMessage)
+                    {
+                        <p class="text-danger">Veuillez entrer un nom valide pour commencer.</p>
+                    }
+                </div>
             </div>
         }
+        else if (!QuizCompleted)
+        {
+            <!-- Écran du quiz -->
+            <section class="d-flex flex-column w-100 align-items-center pt-5">
+                <h3>Question @(currentQuestionIndex + 1)</h3>
+                <p>@questions[currentQuestionIndex].Text</p>
 
-        <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
-    </section>
+                <!-- Affichage du conseil de l'expert -->
+                @if (isJokerExpertUsed)
+                {
+                    @if (expertUsedOnQuestion == currentQuestionIndex)
+                    {
+                        <p class="text-primary"><strong>Conseil de l'expert :</strong> L'expert recommande la réponse : <strong>@expertAdvice</strong></p>
+                    }
+                    else
+                    {
+                        <p class="text-primary"><strong>Conseil de l'expert :</strong> A été utilisé à la question @(expertUsedOnQuestion + 1) ( <strong>@expertAdvice</strong> )</p>
+                    }
+                }
 
-    <!-- Affichage des paliers -->
-    <div class="w-100 d-flex flex-column align-items-center pt-3">
-        <h4>Palier actuel</h4>
-        <ul class="list-group">
-            @for (int i = 0; i < paliers.Count; i++)
-            {
-                <li class="list-group-item @(i == currentQuestionIndex ? "bg-warning" : "")">
-                    Question @(i + 1) : @paliers[i] €
-                </li>
-            }
-        </ul>
+                <!-- Liste des options de réponse -->
+                @foreach (var option in questions[currentQuestionIndex].Options)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" 
+                               @onchange="() => SelectAnswer(option)" checked="@((selectedAnswer == option) ? "checked" : null)" />
+                        <label class="form-check-label">@option
+                            @if (isJokerStatsUsed && stats.ContainsKey(option))
+                            {
+                                <span> (@stats[option]%)</span>
+                            }
+                        </label>
+                    </div>
+                }
+
+                <!-- Bouton Suivant -->
+                <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
+            </section>
+
+            <!-- Jokers -->
+            <div class="d-flex justify-content-around w-100 pt-3">
+                <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
+                <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
+                <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
+            </div>
+        }
+        else
+        {
+            <!-- Écran des résultats -->
+            <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
+                <h2>Félicitations @UserName!</h2>
+                <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
+
+                <h3>Classement final</h3>
+                <ul class="list-group">
+                    @foreach (var player in leaderboard)
+                    {
+                        <li class="list-group-item">
+                            <strong>@player.Name :</strong> @player.Score €
+                        </li>
+                    }
+                </ul>
+
+                <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
+            </div>
+        }
     </div>
-}
-else
-{
-    <!-- Écran des résultats -->
-    <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
-        <h2>Félicitations @UserName!</h2>
-        <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
 
-        <h3>Classement final</h3>
-        <ul class="list-group">
-            @foreach (var player in leaderboard)
-            {
-                <li class="list-group-item">
-                    <strong>@player.Name :</strong> @player.Score €
-                </li>
-            }
-        </ul>
-
-        <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
+    <!-- Section pour les paliers -->
+    <div class="w-25">
+        <!-- Affichage des paliers -->
+        <div class="d-flex flex-column align-items-end">
+            <h4 style="margin-right: 30px;">Palier actuel</h4>
+            <ul class="list-group">
+                @for (int i = 0; i < paliers.Count; i++)
+                {
+                    <li class="list-group-item @(i == currentQuestionIndex ? "bg-warning" : "")">
+                        Question @(i + 1) : @paliers[i] €
+                    </li>
+                }
+            </ul>
+        </div>
     </div>
-}
+</div>
 
 @code {
     private string UserName = "";
     private int currentQuestionIndex = 0;
     private int palier = 0;
     private bool QuizCompleted = false;
-    private bool quizFailed = false; // Variable pour indiquer si le joueur a échoué
+    private bool quizFailed = false;
     private string selectedAnswer = null;
     private bool isNextDisabled = true;
     private bool showErrorMessage = false;
+    private bool isJoker50Used = false;
+    private bool isJokerStatsUsed = false;
+    private bool isJokerExpertUsed = false;
+    private int expertUsedOnQuestion = -1;  // Ajout pour suivre où le joker expert a été utilisé
+    private Dictionary<string, int> stats = new Dictionary<string, int>();
+    private string expertAdvice = "";
 
     private List<Player> leaderboard = new List<Player>();
 
-    // Les paliers de gain comme dans "Qui veut gagner des millions"
     private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
 
     private List<Question> questions = new List<Question>
     {
-        new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris", PalierGain = 500 },
-        new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique", PalierGain = 1000 },
-        new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci", PalierGain = 2000 },
-        new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8", PalierGain = 4000 },
-        new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo", PalierGain = 8000 },
-        // Ajouter d'autres questions ici si nécessaire
+        new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris" },
+        new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique" },
+        new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci" },
+        new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8" },
+        new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo" }
     };
 
     private void StartQuiz()
     {
         if (string.IsNullOrWhiteSpace(UserName))
         {
-            showErrorMessage = true; // Affiche un message d'erreur si le nom d'utilisateur est vide
+            showErrorMessage = true;
         }
         else
         {
-            // Initialisation du quiz
             currentQuestionIndex = 0;
             palier = 0;
             QuizCompleted = false;
-            quizFailed = false; // Réinitialiser l'échec du quiz
+            quizFailed = false;
             selectedAnswer = null;
-            isNextDisabled = true; // Désactive le bouton "Suivant" jusqu'à ce qu'une réponse soit sélectionnée
-            showErrorMessage = false; // Masque le message d'erreur
-            UpdateLeaderboard(); // Mise à jour du classement en temps réel
-            StateHasChanged(); // Actualise l'interface utilisateur
+            isNextDisabled = true;
+            isJoker50Used = false;
+            isJokerStatsUsed = false;
+            isJokerExpertUsed = false;
+            expertUsedOnQuestion = -1;
+            stats.Clear();
+            showErrorMessage = false;
+            StateHasChanged();
         }
     }
 
     private void SelectAnswer(string option)
     {
         selectedAnswer = option;
-        isNextDisabled = false; // Active le bouton "Suivant"
+        isNextDisabled = false;
     }
 
     private void GoToNextQuestion()
     {
         if (selectedAnswer == questions[currentQuestionIndex].CorrectAnswer)
         {
-            palier = paliers[currentQuestionIndex]; // Met à jour le palier selon la question correcte
+            palier = paliers[currentQuestionIndex];
         }
         else
         {
-            // Si mauvaise réponse, terminer le quiz
             quizFailed = true;
             QuizCompleted = true;
             UpdateLeaderboard();
-            return; // Quitter la méthode pour éviter de passer à la question suivante
+            return;
         }
 
         if (currentQuestionIndex < questions.Count - 1)
         {
             currentQuestionIndex++;
-            selectedAnswer = null; // Réinitialise la réponse sélectionnée
-            isNextDisabled = true; // Désactive le bouton "Suivant" jusqu'à ce qu'une nouvelle réponse soit sélectionnée
+            selectedAnswer = null;
+            isNextDisabled = true;
         }
         else
         {
-            QuizCompleted = true; // Terminer le quiz après la dernière question
+            QuizCompleted = true;
         }
 
-        UpdateLeaderboard(); // Mise à jour du classement en temps réel
-        StateHasChanged(); // Actualise l'interface utilisateur
+        UpdateLeaderboard();
+        StateHasChanged();
+    }
+
+    private void UseJoker5050()
+    {
+        isJoker50Used = true;
+        var incorrectOptions = questions[currentQuestionIndex].Options
+            .Where(option => option != questions[currentQuestionIndex].CorrectAnswer)
+            .OrderBy(x => Guid.NewGuid())
+            .Take(2)
+            .ToList();
+
+        questions[currentQuestionIndex].Options.RemoveAll(option => incorrectOptions.Contains(option));
+        StateHasChanged();
+    }
+
+    private void UseJokerStats()
+    {
+        isJokerStatsUsed = true;
+        Random random = new Random();
+        int remainingPercentage = 100;
+        stats.Clear();
+
+        foreach (var option in questions[currentQuestionIndex].Options)
+        {
+            int percentage = random.Next(remainingPercentage / questions[currentQuestionIndex].Options.Count);
+            stats[option] = percentage;
+            remainingPercentage -= percentage;
+        }
+
+        stats[questions[currentQuestionIndex].CorrectAnswer] = remainingPercentage;
+
+        StateHasChanged();
+    }
+
+    private void UseJokerExpertAdvice()
+    {
+        isJokerExpertUsed = true;
+        expertAdvice = questions[currentQuestionIndex].CorrectAnswer;
+        expertUsedOnQuestion = currentQuestionIndex; // Suivi de la question où l'expert est utilisé
+        StateHasChanged();
     }
 
     private void UpdateLeaderboard()
     {
-        // Ajouter le joueur au classement avec son score actuel s'il n'est pas déjà présent
         var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
         if (existingPlayer != null)
         {
-            existingPlayer.Score = palier; // Met à jour le score existant
+            existingPlayer.Score = palier;
         }
         else
         {
             leaderboard.Add(new Player { Name = UserName, Score = palier });
         }
 
-        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList(); // Garde seulement les 10 meilleurs scores
+        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList();
     }
 
     private void RestartQuiz()
     {
-        // Réinitialisation complète du quiz
         UserName = "";
         currentQuestionIndex = 0;
         palier = 0;
@@ -184,11 +264,32 @@ else
         quizFailed = false;
         selectedAnswer = null;
         isNextDisabled = true;
+        isJoker50Used = false;
+        isJokerStatsUsed = false;
+        isJokerExpertUsed = false;
+        expertUsedOnQuestion = -1;
+        stats.Clear();
         showErrorMessage = false;
-        StateHasChanged(); // Actualise l'interface utilisateur
+
+        questions = new List<Question>
+      {
+            new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris" },
+            new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique" },
+            new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci" },
+            new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8" },
+            new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo" },
+            new Question { Text = "Quel est l'élément chimique représenté par le symbole 'Fe' ?", Options = new List<string> { "Fer", "Fluor", "Francium", "Fermium" }, CorrectAnswer = "Fer" },
+            new Question { Text = "Dans quelle ville se trouve la Statue de la Liberté ?", Options = new List<string> { "New York", "Los Angeles", "Chicago", "Boston" }, CorrectAnswer = "New York" },
+            new Question { Text = "Quel est le pays le plus peuplé au monde ?", Options = new List<string> { "Inde", "États-Unis", "Chine", "Brésil" }, CorrectAnswer = "Chine" },
+            new Question { Text = "Quel physicien a développé la théorie de la relativité ?", Options = new List<string> { "Isaac Newton", "Galilée", "Albert Einstein", "Niels Bohr" }, CorrectAnswer = "Albert Einstein" },
+            new Question { Text = "Qui est le premier homme à avoir marché sur la Lune ?", Options = new List<string> { "Neil Armstrong", "Yuri Gagarin", "Buzz Aldrin", "Michael Collins" }, CorrectAnswer = "Neil Armstrong" },
+            new Question { Text = "Quel est le plus long fleuve du monde ?", Options = new List<string> { "Amazone", "Nil", "Yangtze", "Mississippi" }, CorrectAnswer = "Nil" },
+            new Question { Text = "Quelle est la devise nationale de la France ?", Options = new List<string> { "Liberté, Égalité, Fraternité", "Unité, Travail, Progrès", "Justice, Paix, Travail", "Vérité et Justice" }, CorrectAnswer = "Liberté, Égalité, Fraternité" }
+        };
+
+        StateHasChanged();
     }
 
-    // Gérer l'événement de pression sur la touche "Entrée"
     private void HandleKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -197,16 +298,13 @@ else
         }
     }
 
-    // Classe représentant une question
     public class Question
     {
         public string Text { get; set; }
         public List<string> Options { get; set; }
         public string CorrectAnswer { get; set; }
-        public int PalierGain { get; set; }
     }
 
-    // Classe représentant un joueur dans le classement
     public class Player
     {
         public string Name { get; set; }
