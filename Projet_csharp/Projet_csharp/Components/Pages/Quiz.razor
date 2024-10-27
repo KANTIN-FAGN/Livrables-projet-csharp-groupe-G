@@ -1,12 +1,12 @@
 @using System.Text.Json
-@using System.Text.Json.Serialization
+@using System.IO
 @page "/quiz"
 @rendermode InteractiveServer
 
 <PageTitle>Quiz Champion</PageTitle>
 
 <div class="container d-flex">
-    <!-- Section pour le contenu principal (questions, boutons, etc.) -->
+    <!-- Section principale pour le quiz -->
     <div class="w-75">
         <div class="w-100 d-flex justify-content-center">
             <h1>Quiz Champion</h1>
@@ -14,7 +14,7 @@
 
         @if (string.IsNullOrEmpty(UserName))
         {
-            <!-- Écran de saisie du nom d'utilisateur -->
+            <!-- Saisie du nom d'utilisateur -->
             <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
                 <div class="d-flex flex-column gap-4">
                     <h4>Veuillez entrer votre nom de candidat :</h4>
@@ -29,12 +29,12 @@
         }
         else if (!QuizCompleted)
         {
-            <!-- Écran du quiz -->
+            <!-- Affichage du quiz -->
             <section class="d-flex flex-column w-100 align-items-center pt-5">
                 <h3>Question @(currentQuestionIndex + 1)</h3>
                 <p>@questions[currentQuestionIndex].Text</p>
 
-                <!-- Affichage du conseil de l'expert -->
+                <!-- Conseil de l'expert -->
                 @if (isJokerExpertUsed)
                 {
                     @if (expertUsedOnQuestion == currentQuestionIndex)
@@ -43,11 +43,11 @@
                     }
                     else
                     {
-                        <p class="text-primary"><strong>Conseil de l'expert :</strong> A été utilisé à la question @(expertUsedOnQuestion + 1) ( <strong>@expertAdvice</strong> )</p>
+                        <p class="text-primary"><strong>Conseil de l'expert :</strong> Utilisé pour la question @(expertUsedOnQuestion + 1) ( <strong>@expertAdvice</strong> )</p>
                     }
                 }
 
-                <!-- Liste des options de réponse -->
+                <!-- Options de réponse -->
                 @foreach (var option in questions[currentQuestionIndex].Options)
                 {
                     <div class="form-check">
@@ -75,7 +75,7 @@
         }
         else
         {
-            <!-- Écran des résultats -->
+            <!-- Affichage des résultats -->
             <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
                 <h2>Félicitations @UserName!</h2>
                 <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
@@ -95,9 +95,8 @@
         }
     </div>
 
-    <!-- Section pour les paliers -->
+    <!-- Section des paliers -->
     <div class="w-25">
-        <!-- Affichage des paliers -->
         <div class="d-flex flex-column align-items-end">
             <h4 style="margin-right: 30px;">Palier actuel</h4>
             <ul class="list-group">
@@ -113,6 +112,11 @@
 </div>
 
 @code {
+    private string questionsFilePath = "publish/wwwroot/data/questions.json";
+    private List<Question> questions = new List<Question>();
+    private string leaderboardFilePath = "publish/wwwroot/data/leaderboard.json";
+    private List<Player> leaderboard = new List<Player>();
+
     private string UserName = "";
     private int currentQuestionIndex = 0;
     private int palier = 0;
@@ -124,22 +128,41 @@
     private bool isJoker50Used = false;
     private bool isJokerStatsUsed = false;
     private bool isJokerExpertUsed = false;
-    private int expertUsedOnQuestion = -1;  // Ajout pour suivre où le joker expert a été utilisé
+    private int expertUsedOnQuestion = -1;
     private Dictionary<string, int> stats = new Dictionary<string, int>();
     private string expertAdvice = "";
 
-    private List<Player> leaderboard = new List<Player>();
-
     private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
 
-    private List<Question> questions = new List<Question>
+    protected override async Task OnInitializedAsync()
     {
-        new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris" },
-        new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique" },
-        new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci" },
-        new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8" },
-        new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo" }
-    };
+        await LoadQuestionsAsync();
+        LoadLeaderboard();
+    }
+
+    private async Task LoadQuestionsAsync()
+    {
+        if (File.Exists(questionsFilePath))
+        {
+            var json = await File.ReadAllTextAsync(questionsFilePath);
+            questions = JsonSerializer.Deserialize<List<Question>>(json) ?? new List<Question>();
+        }
+    }
+
+    private void LoadLeaderboard()
+    {
+        if (File.Exists(leaderboardFilePath))
+        {
+            var json = File.ReadAllText(leaderboardFilePath);
+            leaderboard = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
+        }
+    }
+
+    private void SaveLeaderboard()
+    {
+        var json = JsonSerializer.Serialize(leaderboard);
+        File.WriteAllText(leaderboardFilePath, json);
+    }
 
     private void StartQuiz()
     {
@@ -228,7 +251,6 @@
         }
 
         stats[questions[currentQuestionIndex].CorrectAnswer] = remainingPercentage;
-
         StateHasChanged();
     }
 
@@ -236,58 +258,21 @@
     {
         isJokerExpertUsed = true;
         expertAdvice = questions[currentQuestionIndex].CorrectAnswer;
-        expertUsedOnQuestion = currentQuestionIndex; // Suivi de la question où l'expert est utilisé
+        expertUsedOnQuestion = currentQuestionIndex;
         StateHasChanged();
     }
 
     private void UpdateLeaderboard()
     {
-        var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
-        if (existingPlayer != null)
-        {
-            existingPlayer.Score = palier;
-        }
-        else
-        {
-            leaderboard.Add(new Player { Name = UserName, Score = palier });
-        }
-
+        leaderboard.Add(new Player { Name = UserName, Score = palier });
         leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList();
+        SaveLeaderboard();
     }
 
     private void RestartQuiz()
     {
         UserName = "";
-        currentQuestionIndex = 0;
-        palier = 0;
-        QuizCompleted = false;
-        quizFailed = false;
-        selectedAnswer = null;
-        isNextDisabled = true;
-        isJoker50Used = false;
-        isJokerStatsUsed = false;
-        isJokerExpertUsed = false;
-        expertUsedOnQuestion = -1;
-        stats.Clear();
-        showErrorMessage = false;
-
-        questions = new List<Question>
-      {
-            new Question { Text = "Quelle est la capitale de la France ?", Options = new List<string> { "Paris", "Londres", "Berlin", "Madrid" }, CorrectAnswer = "Paris" },
-            new Question { Text = "Quel est le plus grand océan ?", Options = new List<string> { "Atlantique", "Indien", "Pacifique", "Arctique" }, CorrectAnswer = "Pacifique" },
-            new Question { Text = "Qui a peint la Joconde ?", Options = new List<string> { "Van Gogh", "Picasso", "Leonard de Vinci", "Rembrandt" }, CorrectAnswer = "Leonard de Vinci" },
-            new Question { Text = "Combien y a-t-il de planètes dans le système solaire ?", Options = new List<string> { "7", "8", "9", "10" }, CorrectAnswer = "8" },
-            new Question { Text = "Qui a écrit 'Les Misérables' ?", Options = new List<string> { "Victor Hugo", "Emile Zola", "Jean-Paul Sartre", "Albert Camus" }, CorrectAnswer = "Victor Hugo" },
-            new Question { Text = "Quel est l'élément chimique représenté par le symbole 'Fe' ?", Options = new List<string> { "Fer", "Fluor", "Francium", "Fermium" }, CorrectAnswer = "Fer" },
-            new Question { Text = "Dans quelle ville se trouve la Statue de la Liberté ?", Options = new List<string> { "New York", "Los Angeles", "Chicago", "Boston" }, CorrectAnswer = "New York" },
-            new Question { Text = "Quel est le pays le plus peuplé au monde ?", Options = new List<string> { "Inde", "États-Unis", "Chine", "Brésil" }, CorrectAnswer = "Chine" },
-            new Question { Text = "Quel physicien a développé la théorie de la relativité ?", Options = new List<string> { "Isaac Newton", "Galilée", "Albert Einstein", "Niels Bohr" }, CorrectAnswer = "Albert Einstein" },
-            new Question { Text = "Qui est le premier homme à avoir marché sur la Lune ?", Options = new List<string> { "Neil Armstrong", "Yuri Gagarin", "Buzz Aldrin", "Michael Collins" }, CorrectAnswer = "Neil Armstrong" },
-            new Question { Text = "Quel est le plus long fleuve du monde ?", Options = new List<string> { "Amazone", "Nil", "Yangtze", "Mississippi" }, CorrectAnswer = "Nil" },
-            new Question { Text = "Quelle est la devise nationale de la France ?", Options = new List<string> { "Liberté, Égalité, Fraternité", "Unité, Travail, Progrès", "Justice, Paix, Travail", "Vérité et Justice" }, CorrectAnswer = "Liberté, Égalité, Fraternité" }
-        };
-
-        StateHasChanged();
+        StartQuiz();
     }
 
     private void HandleKeyPress(KeyboardEventArgs e)
