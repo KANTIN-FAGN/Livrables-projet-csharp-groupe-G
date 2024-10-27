@@ -1,0 +1,253 @@
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@page "/quiz"
+@rendermode InteractiveServer
+
+<PageTitle>Quiz Champion</PageTitle>
+
+<div class="container d-flex">
+    <!-- Section for main content (questions, buttons, etc.) -->
+    <div class="w-75">
+        <div class="w-100 d-flex justify-content-center">
+            <h1>Quiz Champion</h1>
+
+            @if (string.IsNullOrEmpty(UserName))
+            {
+                <!-- User name input screen -->
+                <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+                    <div class="d-flex flex-column gap-4">
+                        <h4>Veuillez entrer votre nom de candidat :</h4>
+                        <input type="text" @bind="UserName" @onkeypress="HandleKeyPress" />
+                        <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
+                    </div>
+                </div>
+            }
+            else if (!QuizCompleted)
+            {
+                <!-- Quiz screen -->
+                <section class="d-flex flex-column w-100 align-items-center pt-5">
+                    <h3>Question @(currentQuestionIndex + 1)</h3>
+                    <p>@questions[currentQuestionIndex].QuestionText</p>
+
+                    <!-- Display expert advice -->
+                    @if (isJokerExpertUsed)
+                    {
+                        <p class="text-primary"><strong>Conseil de l'expert :</strong> @expertAdvice</p>
+                    }
+
+                    <!-- List of answer options -->
+                    @foreach (var option in questions[currentQuestionIndex].Options)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option"
+                                   @onchange="() => SelectAnswer(option)" checked="@((selectedAnswer == option) ? "checked" : null)" />
+                            <label class="form-check-label">@option</label>
+                        </div>
+                    }
+
+                    <!-- Next button -->
+                    <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
+                </section>
+
+                <!-- Jokers -->
+                <div class="d-flex justify-content-around w-100 pt-3">
+                    <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
+                    <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
+                    <button class="btn btn-danger" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Conseil de l'expert</button>
+                </div>
+            }
+            else
+            {
+                <!-- Results screen -->
+                <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
+                    <h2>Félicitations @UserName!</h2>
+                    <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
+                </div>
+            }
+        </div> <!-- End of .w-100 d-flex justify-content-center -->
+    </div> <!-- End of .w-75 -->
+
+    <!-- Section for tiers -->
+    <div class="w-25">
+        <div class="d-flex flex-column align-items-end">
+            <h4 style="margin-right: 30px;">Palier actuel</h4>
+            <ul class="list-group">
+                @foreach (var palier in paliers)
+                {
+                    <li class="list-group-item">@palier €</li>
+                }
+            </ul>
+        </div>
+    </div> <!-- End of .w-25 -->
+</div> <!-- End of .container -->
+
+@code {
+    private string UserName { get; set; }
+    private int currentQuestionIndex = 0;
+    private int palier = 0;
+    private bool QuizCompleted { get; set; }
+    private bool quizFailed { get; set; }
+    private string selectedAnswer = null;
+    private bool isNextDisabled = true;
+    private bool isJoker50Used = false;
+    private bool isJokerStatsUsed = false;
+    private bool isJokerExpertUsed = false;
+    private int expertUsedOnQuestion = -1;
+    private Dictionary<string, int> stats = new Dictionary<string, int>();
+    private string expertAdvice = "";
+
+    private List<Player> leaderboard = new List<Player>();
+
+    private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
+    private List<Question> questions;
+
+    protected override void OnInitialized()
+    {
+        questions = LoadQuestionsFromJson();
+        if (!questions.Any())
+        {
+            Console.WriteLine("No questions loaded.");
+        }
+    }
+
+    private void StartQuiz()
+    {
+        currentQuestionIndex = 0;
+        palier = 0;
+        QuizCompleted = false;
+        quizFailed = false;
+        selectedAnswer = null;
+        isNextDisabled = true;
+        isJoker50Used = false;
+        isJokerStatsUsed = false;
+        isJokerExpertUsed = false;
+        expertUsedOnQuestion = -1;
+        stats.Clear();
+        StateHasChanged();
+    }
+
+    private void GoToNextQuestion()
+    {
+        if (selectedAnswer == questions[currentQuestionIndex].CorrectAnswer)
+        {
+            palier = paliers[currentQuestionIndex];
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.Count)
+            {
+                QuizCompleted = true;
+            }
+        }
+        else
+        {
+            quizFailed = true;
+            QuizCompleted = true;
+        }
+
+        UpdateLeaderboard();
+        StateHasChanged();
+    }
+
+    private void SelectAnswer(string option)
+    {
+        selectedAnswer = option;
+        isNextDisabled = false;
+    }
+
+    private void UseJoker5050()
+    {
+        isJoker50Used = true;
+        var incorrectOptions = questions[currentQuestionIndex].Options
+            .Where(option => option != questions[currentQuestionIndex].CorrectAnswer)
+            .OrderBy(x => Guid.NewGuid())
+            .Take(2)
+            .ToList();
+
+        questions[currentQuestionIndex].Options.RemoveAll(option => incorrectOptions.Contains(option));
+        StateHasChanged();
+    }
+
+    private void UseJokerStats()
+    {
+        isJokerStatsUsed = true;
+        foreach (var option in questions[currentQuestionIndex].Options)
+        {
+            stats[option] = new Random().Next(50, 100); // Generate random stats between 50% and 100%
+        }
+        StateHasChanged();
+    }
+
+    private void UseJokerExpertAdvice()
+    {
+        isJokerExpertUsed = true;
+        expertAdvice = questions[currentQuestionIndex].CorrectAnswer; // Give correct answer as advice
+        expertUsedOnQuestion = currentQuestionIndex; // Track where it was used
+        StateHasChanged();
+    }
+
+    private void UpdateLeaderboard()
+    {
+        var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
+        if (existingPlayer != null)
+        {
+            existingPlayer.Score = palier;
+        }
+        else
+        {
+            leaderboard.Add(new Player { Name = UserName, Score = palier });
+        }
+
+        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList();
+    }
+
+    private List<Question> LoadQuestionsFromJson()
+    {
+        if (!File.Exists("publish/wwwroot/data/dataquiz.json"))
+        {
+            Console.WriteLine("File not found.");
+            return new List<Question>();
+        }
+
+        try
+        {
+            var json = File.ReadAllText("publish/wwwroot/data/dataquiz.json");
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var quizData = JsonSerializer.Deserialize<QuizData>(json, options);
+            return quizData?.Questions ?? new List<Question>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading JSON: {ex.Message}");
+            return new List<Question>();
+        }
+    }
+
+    public class QuizData
+    {
+        public List<Question> Questions { get; set; }
+    }
+
+    public class Question
+    {
+        public string Text { get; set; }
+        public int Id { get; set; }
+        public string Theme { get; set; }
+        public string Difficulty { get; set; }
+        public string QuestionText { get; set; }
+        public List<string> Options { get; set; }
+        public string CorrectAnswer { get; set; }
+    }
+
+    public class Player
+    {
+        public string Name { get; set; }
+        public int Score { get; set; }
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            StartQuiz();
+        }
+    }
+}
