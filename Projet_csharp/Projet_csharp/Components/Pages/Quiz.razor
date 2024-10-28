@@ -1,7 +1,10 @@
 @using System.Text.Json
 @using System.IO
+@using System.Text.Json.Serialization
 @page "/quiz"
 @rendermode InteractiveServer
+
+<link href="css/quiz.css" rel="stylesheet" />
 
 <PageTitle>Quiz Champion</PageTitle>
 
@@ -27,38 +30,29 @@
                 </div>
             </div>
         }
-        else if (!QuizCompleted)
+        else if (string.IsNullOrEmpty(SelectedMode))
+        {
+            <!-- Choix du mode de quiz -->
+            <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+                <h4>Choisissez un mode de questionnaire :</h4>
+                <button class="btn btn-primary mb-2" @onclick="SelectEuropeanMode">Mode Questionnaire Européen</button>
+                <button class="btn btn-secondary" @onclick="SelectGlobalMode">Mode Questionnaire Global</button>
+            </div>
+        }
+        else if (!QuizCompleted && questions.Count > 0 && currentQuestionIndex < questions.Count)
         {
             <!-- Affichage du quiz -->
             <section class="d-flex flex-column w-100 align-items-center pt-5">
                 <h3>Question @(currentQuestionIndex + 1)</h3>
-                <p>@questions[currentQuestionIndex].Text</p>
-
-                <!-- Conseil de l'expert -->
-                @if (isJokerExpertUsed)
-                {
-                    @if (expertUsedOnQuestion == currentQuestionIndex)
-                    {
-                        <p class="text-primary"><strong>Conseil de l'expert :</strong> L'expert recommande la réponse : <strong>@expertAdvice</strong></p>
-                    }
-                    else
-                    {
-                        <p class="text-primary"><strong>Conseil de l'expert :</strong> Utilisé pour la question @(expertUsedOnQuestion + 1) ( <strong>@expertAdvice</strong> )</p>
-                    }
-                }
+                <p>@questions[currentQuestionIndex].Question</p>
 
                 <!-- Options de réponse -->
                 @foreach (var option in questions[currentQuestionIndex].Options)
                 {
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" 
-                               @onchange="() => SelectAnswer(option)" checked="@((selectedAnswer == option) ? "checked" : null)" />
-                        <label class="form-check-label">@option
-                            @if (isJokerStatsUsed && stats.ContainsKey(option))
-                            {
-                                <span> (@stats[option]%)</span>
-                            }
-                        </label>
+                               @onchange="() => SelectAnswer(option)" checked="@(selectedAnswer == option)" />
+                        <label class="form-check-label">@option</label>
                     </div>
                 }
 
@@ -72,6 +66,29 @@
                 <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
                 <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
             </div>
+
+            <!-- Affichage des statistiques si le joker a été utilisé -->
+            @if (isJokerStatsUsed)
+            {
+                <div class="mt-4">
+                    <h5>Statistiques des réponses :</h5>
+                    <ul>
+                        @foreach (var stat in stats)
+                        {
+                            <li>@stat.Key : @stat.Value %</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- Affichage du conseil de l'expert si le joker a été utilisé -->
+            @if (isJokerExpertUsed && expertUsedOnQuestion == currentQuestionIndex)
+            {
+                <div class="mt-4">
+                    <h5>Conseil de l'expert :</h5>
+                    <p>@expertAdvice</p>
+                </div>
+            }
         }
         else
         {
@@ -85,7 +102,7 @@
                     @foreach (var player in leaderboard)
                     {
                         <li class="list-group-item">
-                            <strong>@player.Name :</strong> @player.Score €
+                            <strong>@player.Name :</strong> @player.Score € 
                         </li>
                     }
                 </ul>
@@ -112,12 +129,13 @@
 </div>
 
 @code {
-    private string questionsFilePath = "publish/wwwroot/data/questions.json";
-    private List<Question> questions = new List<Question>();
-    private string leaderboardFilePath = "publish/wwwroot/data/leaderboard.json";
+    private string questionsFilePath = Path.Combine(AppContext.BaseDirectory, "publish", "wwwroot", "data", "questions.json");
+    private List<QuizQuestion> questions = new List<QuizQuestion>();
+    private string leaderboardFilePath = Path.Combine(AppContext.BaseDirectory, "publish", "wwwroot", "data", "leaderboard.json");
     private List<Player> leaderboard = new List<Player>();
 
     private string UserName = "";
+    private string SelectedMode = "";
     private int currentQuestionIndex = 0;
     private int palier = 0;
     private bool QuizCompleted = false;
@@ -136,8 +154,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadLeaderboardAsync();
         await LoadQuestionsAsync();
-        LoadLeaderboard();
     }
 
     private async Task LoadQuestionsAsync()
@@ -145,23 +163,58 @@
         if (File.Exists(questionsFilePath))
         {
             var json = await File.ReadAllTextAsync(questionsFilePath);
-            questions = JsonSerializer.Deserialize<List<Question>>(json) ?? new List<Question>();
+
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var quizData = JsonSerializer.Deserialize<QuizData>(json, options);
+
+                if (quizData == null || quizData.Questions == null || !quizData.Questions.Any())
+                {
+                    QuizCompleted = true;
+                    return;
+                }
+
+                questions = quizData.Questions
+                    .Where(q => !string.IsNullOrEmpty(q.Theme) && 
+                                q.Theme.Equals(SelectedMode, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (questions.Count == 0)
+                {
+                    QuizCompleted = true;
+                    return;
+                }
+            }
+            catch (JsonException)
+            {
+                questions = new List<QuizQuestion>();
+                QuizCompleted = true;
+            }
+        }
+        else
+        {
+            QuizCompleted = true;
         }
     }
 
-    private void LoadLeaderboard()
+    private async Task LoadLeaderboardAsync()
     {
         if (File.Exists(leaderboardFilePath))
         {
-            var json = File.ReadAllText(leaderboardFilePath);
+            var json = await File.ReadAllTextAsync(leaderboardFilePath);
             leaderboard = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
         }
     }
 
-    private void SaveLeaderboard()
+    private async Task SaveLeaderboardAsync()
     {
         var json = JsonSerializer.Serialize(leaderboard);
-        File.WriteAllText(leaderboardFilePath, json);
+        await File.WriteAllTextAsync(leaderboardFilePath, json);
     }
 
     private void StartQuiz()
@@ -172,9 +225,17 @@
         }
         else
         {
-            ResetQuiz();
+            showErrorMessage = false;
             StateHasChanged();
         }
+    }
+
+    private async void SelectMode(string mode)
+    {
+        SelectedMode = mode;
+        await LoadQuestionsAsync();
+        ResetQuiz();
+        StateHasChanged();
     }
 
     private void ResetQuiz()
@@ -192,6 +253,9 @@
         stats.Clear();
     }
 
+    private void SelectEuropeanMode() => SelectMode("European");
+    private void SelectGlobalMode() => SelectMode("Global");
+
     private void SelectAnswer(string option)
     {
         selectedAnswer = option;
@@ -208,7 +272,7 @@
         {
             quizFailed = true;
             QuizCompleted = true;
-            UpdateLeaderboard();
+            UpdateLeaderboardAsync();
             return;
         }
 
@@ -221,9 +285,9 @@
         else
         {
             QuizCompleted = true;
+            UpdateLeaderboardAsync();
         }
 
-        UpdateLeaderboard();
         StateHasChanged();
     }
 
@@ -247,9 +311,15 @@
         int remainingPercentage = 100;
         stats.Clear();
 
-        foreach (var option in questions[currentQuestionIndex].Options)
+        var options = questions[currentQuestionIndex].Options.ToList();
+        foreach (var option in options)
         {
-            int percentage = random.Next(remainingPercentage / questions[currentQuestionIndex].Options.Count);
+            if (option == questions[currentQuestionIndex].CorrectAnswer)
+            {
+                continue;
+            }
+
+            int percentage = random.Next(1, remainingPercentage / options.Count + 1);
             stats[option] = percentage;
             remainingPercentage -= percentage;
         }
@@ -261,41 +331,35 @@
     private void UseJokerExpertAdvice()
     {
         isJokerExpertUsed = true;
-        expertAdvice = questions[currentQuestionIndex].CorrectAnswer;
+        expertAdvice = $"L'expert vous conseille : '{questions[currentQuestionIndex].CorrectAnswer}'";
         expertUsedOnQuestion = currentQuestionIndex;
         StateHasChanged();
     }
 
-private void UpdateLeaderboard()
-{
-    // Vérifier si le joueur existe déjà dans le leaderboard
-    var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
-
-    if (existingPlayer != null)
+    private async Task UpdateLeaderboardAsync()
     {
-        // Mettre à jour le score du joueur si le nouveau score est plus élevé
-        if (palier > existingPlayer.Score)
+        var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
+
+        if (existingPlayer != null)
         {
-            existingPlayer.Score = palier;
+            if (palier > existingPlayer.Score)
+            {
+                existingPlayer.Score = palier;
+            }
         }
-    }
-    else
-    {
-        // Ajouter un nouveau joueur avec son score
-        leaderboard.Add(new Player { Name = UserName, Score = palier });
-    }
+        else
+        {
+            leaderboard.Add(new Player { Name = UserName, Score = palier });
+        }
 
-    // Trier le leaderboard en ordre décroissant et ne garder que les 10 meilleurs scores
-    leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(20).ToList();
-    
-    // Enregistrer le leaderboard mis à jour
-    SaveLeaderboard();
-}
-
+        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList();
+        await SaveLeaderboardAsync();
+    }
 
     private void RestartQuiz()
     {
         UserName = "";
+        SelectedMode = "";
         showErrorMessage = false;
         ResetQuiz();
     }
@@ -308,11 +372,20 @@ private void UpdateLeaderboard()
         }
     }
 
-    public class Question
+    public class QuizQuestion
     {
-        public string Text { get; set; }
+        public int Id { get; set; }
+        public string Theme { get; set; }
+        public string Difficulty { get; set; }
+        public string Question { get; set; }
         public List<string> Options { get; set; }
         public string CorrectAnswer { get; set; }
+    }
+
+    public class QuizData
+    {
+        [JsonPropertyName("questions")]
+        public List<QuizQuestion> Questions { get; set; }
     }
 
     public class Player
