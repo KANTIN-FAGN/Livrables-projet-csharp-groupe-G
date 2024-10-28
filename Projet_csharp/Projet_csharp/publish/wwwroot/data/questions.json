@@ -1,27 +1,196 @@
-[
-  {
-      "Text": "Quelle est la capitale de la France?",
-      "Options": ["Berlin", "Madrid", "Paris", "Lisbonne"],
+{
+  "questions": [
+    {
+      "Id": 1,
+      "Theme": "European",
+      "Difficulty": "easy",
+      "Question": "Quelle est la capitale de la France ?",
+      "Options": ["Paris", "Berlin", "Madrid", "Rome"],
       "CorrectAnswer": "Paris"
-  },
-  {
-      "Text": "Combien de continents existe-t-il?",
-      "Options": ["5", "6", "7", "8"],
-      "CorrectAnswer": "7"
-  },
-  {
-      "Text": "Quel est l’élément chimique avec le symbole H?",
-      "Options": ["Hydrogène", "Hélium", "Carbone", "Oxygène"],
-      "CorrectAnswer": "Hydrogène"
-  },
-  {
-      "Text": "Qui a peint La Joconde?",
-      "Options": ["Vincent van Gogh", "Pablo Picasso", "Claude Monet", "Léonard de Vinci"],
-      "CorrectAnswer": "Léonard de Vinci"
-  },
-  {
-      "Text": "Quelle planète est connue comme la planète rouge?",
-      "Options": ["Mercure", "Venus", "Mars", "Jupiter"],
-      "CorrectAnswer": "Mars"
-  }
-]
+    },
+    {
+      "Id": 2,
+      "Theme": "European",
+      "Difficulty": "easy",
+      "Question": "Quel est le fleuve qui traverse Londres ?",
+      "Options": ["Thames", "Seine", "Danube", "Rhône"],
+      "CorrectAnswer": "Thames"
+    },
+    {
+      "Id": 3,
+      "Theme": "European",
+      "Difficulty": "medium",
+      "Question": "En quelle année l'Union européenne a-t-elle été fondée ?",
+      "Options": ["1993", "2000", "1985", "1975"],
+      "CorrectAnswer": "1993"
+    },
+    {
+      "Id": 4,
+      "Theme": "European",
+      "Difficulty": "medium",
+      "Question": "Quel est le pays le plus peuplé d'Europe ?",
+      "Options": ["Russie", "Allemagne", "France", "Italie"],
+      "CorrectAnswer": "Russie"
+    },
+    {
+      "Id": 5,
+      "Theme": "European",
+      "Difficulty": "medium",
+      "Question": "Quelle monnaie est utilisée en Suède ?",
+      "Options": ["Euro", "Couronne suédoise", "Livre sterling", "Franc suisse"],
+      "CorrectAnswer": "Couronne suédoise"
+    },
+    {
+      "Id": 6,
+      "Theme": "European",
+      "Difficulty": "hard",
+      "Question": "Quel est le point culminant des Alpes ?",
+      "Options": ["Mont Blanc", "Mont Rose", "Grossglockner", "Zugspitze"],
+      "CorrectAnswer": "Mont Blanc"
+    },
+    {
+      "Id": 7,
+      "Theme": "European",
+      "Difficulty": "hard",
+      "Question": "Quelle ville européenne est surnommée 'la Venise du Nord' ?",
+      "Options": ["Amsterdam", "Stockholm", "Bruges", "Copenhague"],
+      "CorrectAnswer": "Amsterdam"
+    },
+    {
+      "Id": 8,
+      "Theme": "European",
+      "Difficulty": "hard",
+      "Question": "Quel est le plus grand lac d'Europe ?",
+      "Options": ["Lac Ladoga", "Lac Léman", "Lac Balaton", "Lac de Constance"],
+      "CorrectAnswer": "Lac Ladoga"
+    },
+    {
+      "Id": 9,
+      "Theme": "European",
+      "Difficulty": "very_hard",
+      "Question": "Quel est le nom du célèbre pont de Prague ?",
+      "Options": ["Pont Charles", "Pont Alexandre III", "Pont Neuf", "Pont de la Liberté"],
+      "CorrectAnswer": "Pont Charles"
+    },
+    {
+      "Id": 10,
+      "Theme": "European",
+      "Difficulty": "very_hard",
+      "Question": "Qui a fondé la ville de Rome, selon la légende ?",
+      "Options": ["Romulus et Rémus", "César", "Néron", "Augustus"],
+      "CorrectAnswer": "Romulus et Rémus"
+    },
+    {
+      "Id": 11,
+      "Theme": "European",
+      "Difficulty": "extreme",
+      "Question": "Quel est le plus ancien parc national d'Europe ?",
+      "Options": ["Parc national d'Abisko", "Parc national des Pyrénées", "Parc national du Triglav", "Parc national de Sarek"],
+      "CorrectAnswer": "Parc national du Triglav"
+    },
+    {
+      "Id": 12,
+      "Theme": "European",
+      "Difficulty": "extreme",
+      "Question": "En quelle année la Pologne a-t-elle rejoint l'UE ?",
+      "Options": ["2004", "2007", "2013", "2001"],
+      "CorrectAnswer": "2004"
+    },
+    {
+      "Id": 13,
+      "Theme": "Global",
+      "Difficulty": "easy",
+      "Question": "Quelle est la couleur du ciel par temps clair ?",
+      "Options": ["Bleu", "Rouge", "Vert", "Jaune"],
+      "CorrectAnswer": "Bleu"
+    },
+    {
+      "Id": 14,
+      "Theme": "Global",
+      "Difficulty": "easy",
+      "Question": "Quel est le plus grand continent ?",
+      "Options": ["Asie", "Afrique", "Europe", "Amérique du Nord"],
+      "CorrectAnswer": "Asie"
+    },
+    {
+      "Id": 15,
+      "Theme": "Global",
+      "Difficulty": "medium",
+      "Question": "Qui a peint la Joconde ?",
+      "Options": ["Leonard de Vinci", "Pablo Picasso", "Vincent van Gogh", "Michel-Ange"],
+      "CorrectAnswer": "Leonard de Vinci"
+    },
+    {
+      "Id": 16,
+      "Theme": "Global",
+      "Difficulty": "medium",
+      "Question": "Quel est le plus grand océan sur Terre ?",
+      "Options": ["Pacifique", "Atlantique", "Indien", "Arctique"],
+      "CorrectAnswer": "Pacifique"
+    },
+    {
+      "Id": 17,
+      "Theme": "Global",
+      "Difficulty": "medium",
+      "Question": "Qui a découvert la pénicilline ?",
+      "Options": ["Alexander Fleming", "Marie Curie", "Louis Pasteur", "Gregor Mendel"],
+      "CorrectAnswer": "Alexander Fleming"
+    },
+    {
+      "Id": 18,
+      "Theme": "Global",
+      "Difficulty": "hard",
+      "Question": "En quelle année l'homme a-t-il marché sur la lune pour la première fois ?",
+      "Options": ["1969", "1975", "1965", "1972"],
+      "CorrectAnswer": "1969"
+    },
+    {
+      "Id": 19,
+      "Theme": "Global",
+      "Difficulty": "hard",
+      "Question": "Quel est l'élément chimique représenté par le symbole 'Fe' ?",
+      "Options": ["Fer", "Plomb", "Argent", "Zinc"],
+      "CorrectAnswer": "Fer"
+    },
+    {
+      "Id": 20,
+      "Theme": "Global",
+      "Difficulty": "hard",
+      "Question": "Qui est l'auteur de 'Les Misérables' ?",
+      "Options": ["Victor Hugo", "Émile Zola", "Charles Baudelaire", "Albert Camus"],
+      "CorrectAnswer": "Victor Hugo"
+    },
+    {
+      "Id": 21,
+      "Theme": "Global",
+      "Difficulty": "very_hard",
+      "Question": "Quel est le nombre total d'os dans le corps humain adulte ?",
+      "Options": ["206", "210", "195", "214"],
+      "CorrectAnswer": "206"
+    },
+    {
+      "Id": 22,
+      "Theme": "Global",
+      "Difficulty": "very_hard",
+      "Question": "Quel est le plus long fleuve du monde ?",
+      "Options": ["Amazone", "Nil", "Yangtsé", "Mississippi"],
+      "CorrectAnswer": "Amazone"
+    },
+    {
+      "Id": 23,
+      "Theme": "Global",
+      "Difficulty": "extreme",
+      "Question": "En quelle année le Titanic a-t-il coulé ?",
+      "Options": ["1912", "1905", "1915", "1920"],
+      "CorrectAnswer": "1912"
+    },
+    {
+      "Id": 24,
+      "Theme": "Global",
+      "Difficulty": "extreme",
+      "Question": "Quel est le nom de la plus haute montagne du Japon ?",
+      "Options": ["Mont Fuji", "Mont Aso", "Mont Hotaka", "Mont Tate"],
+      "CorrectAnswer": "Mont Fuji"
+    }
+  ]
+}
