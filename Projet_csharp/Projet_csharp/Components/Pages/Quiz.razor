@@ -172,20 +172,24 @@
         }
         else
         {
-            currentQuestionIndex = 0;
-            palier = 0;
-            QuizCompleted = false;
-            quizFailed = false;
-            selectedAnswer = null;
-            isNextDisabled = true;
-            isJoker50Used = false;
-            isJokerStatsUsed = false;
-            isJokerExpertUsed = false;
-            expertUsedOnQuestion = -1;
-            stats.Clear();
-            showErrorMessage = false;
+            ResetQuiz();
             StateHasChanged();
         }
+    }
+
+    private void ResetQuiz()
+    {
+        currentQuestionIndex = 0;
+        palier = 0;
+        QuizCompleted = false;
+        quizFailed = false;
+        selectedAnswer = null;
+        isNextDisabled = true;
+        isJoker50Used = false;
+        isJokerStatsUsed = false;
+        isJokerExpertUsed = false;
+        expertUsedOnQuestion = -1;
+        stats.Clear();
     }
 
     private void SelectAnswer(string option)
@@ -262,17 +266,38 @@
         StateHasChanged();
     }
 
-    private void UpdateLeaderboard()
+private void UpdateLeaderboard()
+{
+    // Vérifier si le joueur existe déjà dans le leaderboard
+    var existingPlayer = leaderboard.FirstOrDefault(p => p.Name == UserName);
+
+    if (existingPlayer != null)
     {
-        leaderboard.Add(new Player { Name = UserName, Score = palier });
-        leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(10).ToList();
-        SaveLeaderboard();
+        // Mettre à jour le score du joueur si le nouveau score est plus élevé
+        if (palier > existingPlayer.Score)
+        {
+            existingPlayer.Score = palier;
+        }
     }
+    else
+    {
+        // Ajouter un nouveau joueur avec son score
+        leaderboard.Add(new Player { Name = UserName, Score = palier });
+    }
+
+    // Trier le leaderboard en ordre décroissant et ne garder que les 10 meilleurs scores
+    leaderboard = leaderboard.OrderByDescending(p => p.Score).Take(20).ToList();
+    
+    // Enregistrer le leaderboard mis à jour
+    SaveLeaderboard();
+}
+
 
     private void RestartQuiz()
     {
         UserName = "";
-        StartQuiz();
+        showErrorMessage = false;
+        ResetQuiz();
     }
 
     private void HandleKeyPress(KeyboardEventArgs e)
