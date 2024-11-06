@@ -4,117 +4,118 @@
 @page "/quiz"
 @rendermode InteractiveServer
 
-<link href="css/quiz.css" rel="stylesheet" />
+<link href="../quiz.css" rel="stylesheet" />
 
 <PageTitle>Quiz Champion</PageTitle>
 
-<div class="container d-flex">
-    <!-- Section principale pour le quiz -->
-    <div class="w-75">
-        <div class="w-100 d-flex justify-content-center">
-            <h1>Quiz Champion</h1>
-        </div>
-
-        @if (string.IsNullOrEmpty(UserName))
-        {
-            <!-- Saisie du nom d'utilisateur -->
-            <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
-                <div class="d-flex flex-column gap-4">
-                    <h4>Veuillez entrer votre nom de candidat :</h4>
-                    <InputText @bind-Value="UserName" class="form-control" placeholder="Nom De Candidat ..." @onkeydown="@(e => HandleKeyPress(e))" />
-                    <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
-                    @if (showErrorMessage)
-                    {
-                        <p class="text-danger">Veuillez entrer un nom valide pour commencer.</p>
-                    }
-                </div>
-            </div>
-        }
-        else if (string.IsNullOrEmpty(SelectedMode))
-        {
-            <!-- Choix du mode de quiz -->
-            <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
-                <h4>Choisissez un mode de questionnaire :</h4>
-                <button class="btn btn-primary mb-2" @onclick="SelectEuropeanMode">Mode Questionnaire Européen</button>
-                <button class="btn btn-secondary" @onclick="SelectGlobalMode">Mode Questionnaire Global</button>
-            </div>
-        }
-        else if (!QuizCompleted && questions.Count > 0 && currentQuestionIndex < questions.Count)
-        {
-            <!-- Affichage du quiz -->
-            <section class="d-flex flex-column w-100 align-items-center pt-5">
-                <h3>Question @(currentQuestionIndex + 1)</h3>
-                <p>@questions[currentQuestionIndex].Question</p>
-
-                <!-- Options de réponse -->
-                @foreach (var option in questions[currentQuestionIndex].Options)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" 
-                               @onchange="() => SelectAnswer(option)" checked="@(selectedAnswer == option)" />
-                        <label class="form-check-label">@option</label>
-                    </div>
-                }
-
-                <!-- Bouton Suivant -->
-                <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
-            </section>
-
-            <!-- Jokers -->
-            <div class="d-flex justify-content-around w-100 pt-3">
-                <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
-                <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
-                <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
+<div class="quiz-page">
+    <div class="container d-flex">
+        <!-- Section principale pour le quiz -->
+        <div class="quiz-section w-75">
+            <div class="w-100 d-flex justify-content-center">
+                <h1>Quiz Champion</h1>
             </div>
 
-            <!-- Affichage des statistiques si le joker a été utilisé -->
-            @if (isJokerStatsUsed)
+            @if (string.IsNullOrEmpty(UserName))
             {
-                <div class="mt-4">
-                    <h5>Statistiques des réponses :</h5>
-                    <ul>
-                        @foreach (var stat in stats)
+                <!-- Saisie du nom d'utilisateur -->
+                <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+                    <div class="d-flex flex-column gap-4">
+                        <h4>Veuillez entrer votre nom de candidat :</h4>
+                        <InputText @bind-Value="UserName" class="form-control" placeholder="Nom De Candidat ..." @onkeydown="@(e => HandleKeyPress(e))" />
+                        <button class="btn btn-primary" @onclick="StartQuiz">Commencer le quiz</button>
+                        @if (showErrorMessage)
                         {
-                            <li>@stat.Key : @stat.Value %</li>
+                            <p class="text-danger">Veuillez entrer un nom valide pour commencer.</p>
+                        }
+                    </div>
+                </div>
+            }
+            else if (string.IsNullOrEmpty(SelectedMode))
+            {
+                <!-- Choix du mode de quiz -->
+                <div class="w-100 d-flex flex-column justify-content-center align-items-center" style="height: 40vh;">
+                    <h4>Choisissez un mode de questionnaire :</h4>
+                    <button class="btn btn-primary mb-2" @onclick="SelectEuropeanMode">Mode Questionnaire Européen</button>
+                    <button class="btn btn-secondary" @onclick="SelectGlobalMode">Mode Questionnaire Global</button>
+                </div>
+            }
+            else if (!QuizCompleted && questions.Count > 0 && currentQuestionIndex < questions.Count)
+            {
+                <!-- Affichage du quiz -->
+                <section class="d-flex flex-column w-100 align-items-center pt-5">
+                    <h3>Question @(currentQuestionIndex + 1)</h3>
+                    <p>@questions[currentQuestionIndex].Question</p>
+
+                    <!-- Options de réponse -->
+                    @foreach (var option in questions[currentQuestionIndex].Options)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" 
+                                   @onchange="() => SelectAnswer(option)" checked="@(selectedAnswer == option)" />
+                            <label class="form-check-label">@option</label>
+                        </div>
+                    }
+
+                    <!-- Bouton Suivant -->
+                    <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
+                </section>
+
+                <!-- Jokers -->
+                <div class="d-flex justify-content-around w-100 pt-3 jokers">
+                    <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
+                    <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
+                    <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
+                </div>
+
+                <!-- Affichage des statistiques si le joker a été utilisé -->
+                @if (isJokerStatsUsed)
+                {
+                    <div class="mt-4">
+                        <h5>Statistiques des réponses :</h5>
+                        <ul>
+                            @foreach (var stat in stats)
+                            {
+                                <li>@stat.Key : @stat.Value %</li>
+                            }
                         }
                     </ul>
                 </div>
-            }
+                }
 
-            <!-- Affichage du conseil de l'expert si le joker a été utilisé -->
-            @if (isJokerExpertUsed && expertUsedOnQuestion == currentQuestionIndex)
+                <!-- Affichage du conseil de l'expert si le joker a été utilisé -->
+                @if (isJokerExpertUsed && expertUsedOnQuestion == currentQuestionIndex)
+                {
+                    <div class="mt-4">
+                        <h5>Conseil de l'expert :</h5>
+                        <p>@expertAdvice</p>
+                    </div>
+                }
+            }
+            else
             {
-                <div class="mt-4">
-                    <h5>Conseil de l'expert :</h5>
-                    <p>@expertAdvice</p>
+                <!-- Affichage des résultats -->
+                <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
+                    <h2>Félicitations @UserName!</h2>
+                    <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
+
+                    <h3>Classement final</h3>
+                    <ul class="list-group">
+                        @foreach (var player in leaderboard)
+                        {
+                            <li class="list-group-item">
+                                <strong>@player.Name :</strong> @player.Score € 
+                            </li>
+                        }
+                    </ul>
+
+                    <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
                 </div>
             }
-        }
-        else
-        {
-            <!-- Affichage des résultats -->
-            <div class="w-100 d-flex flex-column justify-content-center align-items-center pt-5">
-                <h2>Félicitations @UserName!</h2>
-                <p>@(quizFailed ? "Gain Potentiel : " + palier : "Vous avez gagné " + palier) €</p>
+        </div>
 
-                <h3>Classement final</h3>
-                <ul class="list-group">
-                    @foreach (var player in leaderboard)
-                    {
-                        <li class="list-group-item">
-                            <strong>@player.Name :</strong> @player.Score € 
-                        </li>
-                    }
-                </ul>
-
-                <button class="btn btn-primary mt-3" @onclick="RestartQuiz">Rejouer</button>
-            </div>
-        }
-    </div>
-
-    <!-- Section des paliers -->
-    <div class="w-25">
-        <div class="d-flex flex-column align-items-end">
+        <!-- Section des paliers -->
+        <div class="paliers w-25">
             <h4 style="margin-right: 30px;">Palier actuel</h4>
             <ul class="list-group">
                 @for (int i = 0; i < paliers.Count; i++)
