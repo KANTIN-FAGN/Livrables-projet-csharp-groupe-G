@@ -47,15 +47,16 @@
                     <h3>Question @(currentQuestionIndex + 1)</h3>
                     <p>@questions[currentQuestionIndex].Question</p>
 
-                    <!-- Options de réponse -->
-                    @foreach (var option in questions[currentQuestionIndex].Options)
-                    {
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="question-@currentQuestionIndex" value="@option" 
-                                   @onchange="() => SelectAnswer(option)" checked="@(selectedAnswer == option)" />
-                            <label class="form-check-label">@option</label>
-                        </div>
-                    }
+                    <!-- Options de réponse faire aussi en sorte de cliquer sur la réponse elle meme ca fonctionne -->
+                  @foreach (var option in questions[currentQuestionIndex].Options)
+{
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="option-@option" name="question-@currentQuestionIndex" value="@option" 
+               @onchange="() => SelectAnswer(option)" />
+        <label class="form-check-label" for="option-@option">@option</label>
+    </div>
+}
+
 
                     <!-- Bouton Suivant -->
                     <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
