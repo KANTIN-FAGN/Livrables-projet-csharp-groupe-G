@@ -103,6 +103,46 @@ button:hover {
     }
 }
 
+/* Conteneur des jokers */
+.jokers {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Espace uniforme entre les boutons */
+    margin-top: 15px; /* Espace au-dessus de la ligne des jokers */
+}
+
+/* Styles communs pour les boutons de joker */
+.jokers button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Couleurs spécifiques des boutons de joker */
+.jokers .btn-warning {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.jokers .btn-info {
+    background-color: #29b6f6;
+    color: #fff;
+}
+
+.jokers .btn-primary {
+    background-color: #66bb6a;
+    color: #fff;
+}
+
+.jokers button:hover {
+    opacity: 0.9; /* Effet au survol */
+}
+
+
+
 /* Adaptation pour les très petits écrans */
 @media (max-width: 480px) {
     .container {
