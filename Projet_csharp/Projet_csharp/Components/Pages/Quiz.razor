@@ -61,10 +61,10 @@
                     <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
                 </section>
 
-                <!-- Jokers -->
-                <div class="d-flex justify-content-around w-100 pt-3 jokers">
-                    <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
+                <!-- Jokers alignés -->
+               <div class="d-flex justify-content-around w-100 pt-3 jokers">
                     <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
+                    <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
                     <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
                 </div>
 
@@ -78,9 +78,8 @@
                             {
                                 <li>@stat.Key : @stat.Value %</li>
                             }
-                        }
-                    </ul>
-                </div>
+                        </ul>
+                    </div>
                 }
 
                 <!-- Affichage du conseil de l'expert si le joker a été utilisé -->
