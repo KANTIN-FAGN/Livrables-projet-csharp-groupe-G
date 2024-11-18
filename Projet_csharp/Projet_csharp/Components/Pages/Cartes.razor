@@ -1,0 +1,491 @@
+@page "/cardgame"
+@rendermode InteractiveServer
+
+<PageTitle>Jeux de Cartes</PageTitle>
+<link href="css/game-styles.css" rel="stylesheet" />
+
+<div class="game-container">
+    @if (!gameSelected)
+    {
+        <!-- Menu principal -->
+        <div class="welcome-screen">
+            <h1 class="title">Bienvenue dans les Jeux de Cartes</h1>
+            <p class="instructions">Choisissez un mode de jeu :</p>
+            <div class="game-selection">
+                <button class="btn btn-primary" @onclick="SelectBattle">Mode Bataille</button>
+                <button class="btn btn-primary" @onclick="SelectBlackjack">Mode Blackjack</button>
+            </div>
+        </div>
+    }
+    else if (selectedGame == "Battle")
+    {
+        @if (!gameStarted)
+        {
+            <!-- Écran d'accueil Bataille -->
+            <div class="welcome-screen">
+                <h1 class="title">Bienvenue dans le Jeu de Bataille</h1>
+                <p class="rules">
+                    Règles du jeu :
+                    <ul>
+                        <li>Chaque joueur commence avec la moitié du paquet.</li>
+                        <li>Chaque tour, les deux joueurs jouent une carte.</li>
+                        <li>La carte la plus forte remporte le tour, et le joueur marque un point.</li>
+                        <li>Le premier joueur à atteindre @maxPoints points gagne la partie.</li>
+                    </ul>
+                </p>
+                <button class="btn-start" @onclick="StartBattleGame">Commencer le jeu</button>
+            </div>
+        }
+        else
+        {
+            <!-- Jeu de Bataille -->
+            <div class="game-board fade-in">
+                <h2>Jeu de Bataille</h2>
+                <h3>Tour: @roundCount</h3>
+                <div class="scores">
+                    <div class="player-score">
+                        Joueur 1 : <span class="score">@player1Score</span> points
+                    </div>
+                    <div class="player-score">
+                        Joueur 2 : <span class="score">@player2Score</span> points
+                    </div>
+                </div>
+
+                <div class="card-container">
+                    <div class="card-area">
+                        <h4>Joueur 1</h4>
+                        <p>Cartes restantes : @player1Deck.Count</p>
+                        @if (!string.IsNullOrEmpty(player1Card))
+                        {
+                            <img class="card-image" src="@GetCardImage(player1Card)" alt="@player1Card" />
+                        }
+                    </div>
+                    <div class="card-area">
+                        <h4>Joueur 2</h4>
+                        <p>Cartes restantes : @player2Deck.Count</p>
+                        @if (!string.IsNullOrEmpty(player2Card))
+                        {
+                            <img class="card-image" src="@GetCardImage(player2Card)" alt="@player2Card" />
+                        }
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" @onclick="PlayBattleTurn" disabled="@battleGameOver">Tour Suivant</button>
+                </div>
+
+                @if (battleGameOver)
+                {
+                    <div class="game-over">
+                        <h3 class="winner">Le gagnant est <span class="highlight">@battleWinner</span> !</h3>
+                        <button class="btn btn-success" @onclick="RestartBattleGame">Recommencer</button>
+                        <button class="btn btn-secondary" @onclick="ReturnToMenu">Retour</button>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else if (selectedGame == "Blackjack")
+    {
+        @if (!gameStarted)
+        {
+            <!-- Écran d'accueil Blackjack -->
+            <div class="welcome-screen">
+                <h1 class="title">Bienvenue au Blackjack</h1>
+                <p class="rules">
+                    Règles du jeu :
+                    <ul>
+                        <li>Le but est d'obtenir un score le plus proche possible de 21 sans le dépasser.</li>
+                        <li>Chaque joueur joue contre la banque.</li>
+                        <li>Le jeu se déroule en 3 rounds.</li>
+                        <li>Si vous gagnez un round, votre balance est doublée.</li>
+                        <li>Si vous perdez un round, vous perdez la moitié de votre mise de base.</li>
+                    </ul>
+                    Bonne chance !
+                </p>
+                <button class="btn btn-primary" @onclick="StartBlackjackGame">Commencer</button>
+            </div>
+        }
+        else
+        {
+            <!-- Jeu de Blackjack -->
+            <div class="game-board">
+                <h1>Blackjack - Round @currentRound / 3</h1>
+                <h3>Tour actuel : <span class="highlight">@currentPlayer</span></h3>
+                <div class="scores">
+                    @foreach (var player in balances.Keys)
+                    {
+                        <div class="player-info">
+                            <p class="player-name">@player</p>
+                            <p class="player-score">Points : @CalculateHandValue(hands[player])</p>
+                            <p class="player-balance">Balance : @balances[player] €</p>
+                            <div class="card-area">
+                                @foreach (var card in hands[player])
+                                {
+                                    <img class="card-image" src="@GetCardImage(card)" alt="@card" />
+                                }
+                            </div>
+                        </div>
+                    }
+                    <div class="dealer-info">
+                        <p class="player-name">Banque</p>
+                        <p class="player-score">Points :
+                            @if (currentPlayer == "Banque" || blackjackGameOver)
+                            {
+                                <span>@CalculateHandValue(hands["Banque"])</span>
+                            }
+                            else
+                            {
+                                <span>?</span>
+                            }
+                        </p>
+                        <div class="card-area">
+                            @foreach (var card in hands["Banque"])
+                            {
+                                <img class="card-image @(currentPlayer != "Banque" && card == hands["Banque"][1] ? "hidden-card" : "")"
+                                     src="@GetCardImage(card)" alt="@card" />
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (!blackjackGameOver)
+                {
+                    @if (currentPlayer != "Banque")
+                    {
+                        <div class="actions">
+                            <p class="commentary">@commentary</p>
+                            <button class="btn btn-primary" @onclick="Hit">Tirer (Hit)</button>
+                            <button class="btn btn-primary" @onclick="Stand">Rester (Stand)</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>La banque joue...</p>
+                    }
+                }
+                else if (currentRound < 3)
+                {
+                    <div class="game-over">
+                        <h3 class="game-over-title">Fin du round @currentRound. Préparez-vous pour le prochain !</h3>
+                        <button class="btn btn-primary" @onclick="NextRound">Prochain Round</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="game-over">
+                        <h3 class="game-over-title">Fin du jeu ! Merci d'avoir joué.</h3>
+                        <button class="btn btn-success" @onclick="RestartBlackjackGame">Recommencer</button>
+                        <button class="btn btn-secondary" @onclick="ReturnToMenu">Retour</button>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<style>
+    /* Styles globaux */
+    /* Ajoutez vos styles CSS ici */
+</style>
+
+@code {
+    private bool gameSelected = false;
+    private string selectedGame = "";
+    private bool gameStarted = false;
+
+    // Variables pour la Bataille
+    private List<string> battleDeck = new();
+    private List<string> player1Deck = new();
+    private List<string> player2Deck = new();
+    private string player1Card = "";
+    private string player2Card = "";
+    private int roundCount = 0;
+    private int player1Score = 0;
+    private int player2Score = 0;
+    private string battleWinner = "";
+    private bool battleGameOver = false;
+    private const int maxPoints = 10;
+
+    // Variables pour le Blackjack
+    private Dictionary<string, List<string>> hands = new();
+    private Dictionary<string, int> balances = new();
+    private List<string> blackjackDeck = new();
+    private string currentPlayer = "";
+    private int currentRound = 1;
+    private string commentary = "";
+    private bool blackjackGameOver = false;
+    private const int startingBet = 100;
+
+    private void SelectBattle()
+    {
+        selectedGame = "Battle";
+        gameSelected = true;
+    }
+
+    private void SelectBlackjack()
+    {
+        selectedGame = "Blackjack";
+        gameSelected = true;
+    }
+
+    // Fonctions pour le jeu de Bataille
+    private void StartBattleGame()
+    {
+        InitializeBattleGame();
+        gameStarted = true;
+    }
+
+    private void InitializeBattleGame()
+    {
+        battleDeck = GenerateFullDeck();
+        ShuffleDeck(battleDeck);
+
+        player1Deck = battleDeck.Take(battleDeck.Count / 2).ToList();
+        player2Deck = battleDeck.Skip(battleDeck.Count / 2).ToList();
+
+        player1Score = 0;
+        player2Score = 0;
+        roundCount = 0;
+        battleGameOver = false;
+        battleWinner = "";
+    }
+
+    private void PlayBattleTurn()
+    {
+        if (player1Deck.Count > 0 && player2Deck.Count > 0)
+        {
+            player1Card = player1Deck[0];
+            player2Card = player2Deck[0];
+
+            player1Deck.RemoveAt(0);
+            player2Deck.RemoveAt(0);
+
+            int player1Value = GetCardValue(player1Card);
+            int player2Value = GetCardValue(player2Card);
+
+            if (player1Value > player2Value)
+            {
+                player1Score++;
+            }
+            else if (player2Value > player1Value)
+            {
+                player2Score++;
+            }
+
+            roundCount++;
+
+            if (player1Score >= maxPoints)
+            {
+                battleGameOver = true;
+                battleWinner = "Joueur 1";
+            }
+            else if (player2Score >= maxPoints)
+            {
+                battleGameOver = true;
+                battleWinner = "Joueur 2";
+            }
+        }
+    }
+
+    private void RestartBattleGame()
+    {
+        InitializeBattleGame();
+        gameStarted = true;
+    }
+
+    // Fonctions pour le Blackjack
+    private void StartBlackjackGame()
+    {
+        InitializeBlackjackGame();
+        gameStarted = true;
+    }
+
+    private void InitializeBlackjackGame()
+    {
+        blackjackDeck = GenerateFullDeck();
+        ShuffleDeck(blackjackDeck);
+
+        hands.Clear();
+        balances.Clear();
+
+        hands["Banque"] = new List<string> { DrawCard(blackjackDeck), DrawCard(blackjackDeck) };
+        hands["Joueur"] = new List<string> { DrawCard(blackjackDeck), DrawCard(blackjackDeck) };
+
+        balances["Joueur"] = startingBet;
+        currentPlayer = "Joueur";
+        commentary = "Bonne chance ! La partie commence.";
+    }
+
+    private void Hit()
+    {
+        hands[currentPlayer].Add(DrawCard(blackjackDeck));
+        int value = CalculateHandValue(hands[currentPlayer]);
+        commentary = $"{currentPlayer} a tiré une carte.";
+
+        if (value > 21)
+        {
+            commentary = $"{currentPlayer} a dépassé 21 ! Perdu !";
+            NextPlayer();
+        }
+    }
+
+    private void Stand()
+    {
+        commentary = $"{currentPlayer} reste avec {CalculateHandValue(hands[currentPlayer])} points.";
+        NextPlayer();
+    }
+
+    private void NextPlayer()
+    {
+        if (currentPlayer == "Joueur")
+        {
+            currentPlayer = "Banque";
+            PlayDealerTurn();
+        }
+    }
+
+    private void PlayDealerTurn()
+    {
+        while (CalculateHandValue(hands["Banque"]) < 17)
+        {
+            hands["Banque"].Add(DrawCard(blackjackDeck));
+        }
+
+        blackjackGameOver = true;
+        DetermineWinner();
+    }
+
+    private void DetermineWinner()
+    {
+        int dealerValue = CalculateHandValue(hands["Banque"]);
+        int playerValue = CalculateHandValue(hands["Joueur"]);
+
+        if (playerValue > 21 || (dealerValue <= 21 && dealerValue > playerValue))
+        {
+            balances["Joueur"] -= startingBet / 2; // Perte moitié mise
+            commentary = $"Vous avez perdu ce round.";
+        }
+        else if (playerValue <= 21 && (dealerValue > 21 || playerValue > dealerValue))
+        {
+            balances["Joueur"] += startingBet; // Gain double
+            commentary = $"Vous avez gagné ce round.";
+        }
+        else
+        {
+            commentary = $"Égalité.";
+        }
+
+        if (currentRound >= 3)
+        {
+            blackjackGameOver = true;
+        }
+    }
+
+    private void NextRound()
+    {
+        currentRound++;
+        if (currentRound <= 3)
+        {
+            InitializeBlackjackGame();
+            blackjackGameOver = false;
+        }
+        else
+        {
+            ReturnToMenu();
+        }
+    }
+
+    private void RestartBlackjackGame()
+    {
+        gameStarted = false;
+        blackjackGameOver = false;
+        currentRound = 1;
+    }
+
+    private void ReturnToMenu()
+    {
+        gameStarted = false;
+        blackjackGameOver = false;
+        battleGameOver = false;
+        gameSelected = false;
+    }
+
+    // Fonctions communes
+    private List<string> GenerateFullDeck()
+    {
+        var suits = new[] { "coeur", "carreau", "trefle", "pique" };
+        var ranks = new[] { "2", "3", "4", "5", "6", "7", "8", "9", "10", "valet", "dame", "roi", "as" };
+        return suits.SelectMany(suit => ranks.Select(rank => $"{rank}_de_{suit}")).ToList();
+    }
+
+    private void ShuffleDeck(List<string> deck)
+    {
+        var rng = new Random();
+        deck.Sort((x, y) => rng.Next(-1, 2));
+    }
+
+    private string DrawCard(List<string> deck)
+    {
+        string card = deck[0];
+        deck.RemoveAt(0);
+        return card;
+    }
+
+    private int GetCardValue(string card)
+    {
+        string rank = card.Split('_')[0];
+        return rank switch
+        {
+            "2" => 2,
+            "3" => 3,
+            "4" => 4,
+            "5" => 5,
+            "6" => 6,
+            "7" => 7,
+            "8" => 8,
+            "9" => 9,
+            "10" => 10,
+            "valet" => 11,
+            "dame" => 12,
+            "roi" => 13,
+            "as" => 14, // Pour la Bataille
+            _ => 0
+        };
+    }
+
+    private int CalculateHandValue(List<string> hand)
+    {
+        int value = 0;
+        int aces = 0;
+        foreach (var card in hand)
+        {
+            string rank = card.Split('_')[0];
+
+            if (rank == "valet" || rank == "dame" || rank == "roi")
+            {
+                value += 10;
+            }
+            else if (rank == "as")
+            {
+                aces++;
+                value += 11;
+            }
+            else
+            {
+                value += int.Parse(rank);
+            }
+        }
+        while (value > 21 && aces > 0)
+        {
+            value -= 10; // Compter l'As comme 1 au lieu de 11
+            aces--;
+        }
+        return value;
+    }
+
+    private string GetCardImage(string card)
+    {
+        return $"/images/cards/{card}.png";
+    }
+}
