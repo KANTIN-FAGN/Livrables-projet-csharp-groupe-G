@@ -47,30 +47,29 @@
                     <h3>Question @(currentQuestionIndex + 1)</h3>
                     <p>@questions[currentQuestionIndex].Question</p>
 
-                    <!-- Options de réponse faire aussi en sorte de cliquer sur la réponse elle meme ca fonctionne -->
-                  @foreach (var option in questions[currentQuestionIndex].Options)
-{
-    <div class="form-check">
-        <input class="form-check-input" type="radio" id="option-@option" name="question-@currentQuestionIndex" value="@option" 
-               @onchange="() => SelectAnswer(option)" />
-        <label class="form-check-label" for="option-@option">@option</label>
-    </div>
-}
-
+                    <!-- Options de réponse -->
+                    @foreach (var option in questions[currentQuestionIndex].Options)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="option-@option" name="question-@currentQuestionIndex" value="@option" 
+                                   checked="@IsOptionSelected(option)" @onchange="() => SelectAnswer(option)" />
+                            <label class="form-check-label" for="option-@option">@option</label>
+                        </div>
+                    }
 
                     <!-- Bouton Suivant -->
                     <button class="btn btn-secondary mt-3" @onclick="GoToNextQuestion" disabled="@isNextDisabled">Suivant</button>
                 </section>
 
                 <!-- Jokers alignés -->
-               <div class="d-flex justify-content-around w-100 pt-3 jokers">
+                <div class="d-flex justify-content-around w-100 pt-3 jokers">
                     <button class="btn btn-info" @onclick="UseJokerStats" disabled="@isJokerStatsUsed">Afficher les stats</button>
                     <button class="btn btn-warning" @onclick="UseJoker5050" disabled="@isJoker50Used">50:50</button>
                     <button class="btn btn-primary" @onclick="UseJokerExpertAdvice" disabled="@isJokerExpertUsed">Appel à un expert</button>
                 </div>
 
                 <!-- Affichage des statistiques si le joker a été utilisé -->
-                @if (isJokerStatsUsed)
+                @if (isJokerStatsUsed && currentStatsQuestionIndex == currentQuestionIndex)
                 {
                     <div class="mt-4">
                         <h5>Statistiques des réponses :</h5>
@@ -150,6 +149,8 @@
     private int expertUsedOnQuestion = -1;
     private Dictionary<string, int> stats = new Dictionary<string, int>();
     private string expertAdvice = "";
+
+    private int currentStatsQuestionIndex = -1; // Pour restreindre l'affichage des stats à une seule question
 
     private List<int> paliers = new List<int> { 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000 };
 
@@ -252,10 +253,13 @@
         isJokerExpertUsed = false;
         expertUsedOnQuestion = -1;
         stats.Clear();
+        currentStatsQuestionIndex = -1;
     }
 
     private void SelectEuropeanMode() => SelectMode("European");
     private void SelectGlobalMode() => SelectMode("Global");
+
+    private bool IsOptionSelected(string option) => selectedAnswer == option;
 
     private void SelectAnswer(string option)
     {
@@ -280,8 +284,11 @@
         if (currentQuestionIndex < questions.Count - 1)
         {
             currentQuestionIndex++;
-            selectedAnswer = null;
+            selectedAnswer = null; // Réinitialise la sélection
             isNextDisabled = true;
+
+            // Réinitialiser l'état des jokers liés à la question
+            currentStatsQuestionIndex = -1; // Effacer l'affichage des statistiques
         }
         else
         {
@@ -307,7 +314,11 @@
 
     private void UseJokerStats()
     {
+        if (isJokerStatsUsed) return; // Empêcher la réutilisation
+
         isJokerStatsUsed = true;
+        currentStatsQuestionIndex = currentQuestionIndex;
+
         Random random = new Random();
         int remainingPercentage = 100;
         stats.Clear();
