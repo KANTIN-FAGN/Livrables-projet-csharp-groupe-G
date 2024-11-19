@@ -1,175 +1,222 @@
-﻿@page "/calculator"
+﻿@page "/windows-calculator"
 @rendermode InteractiveServer
 
-<PageTitle>Calculator</PageTitle>
+<PageTitle>Windows Calculator</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
-    <h1>Calculator</h1>
+    <h1>Windows Calculator</h1>
 
-    <div class="bg-black" style="width: 450px; height: 720px; border-radius: 30px">
-        <div class="h-25 d-flex justify-content-end align-items-end text display-3" style="margin-right: 1rem">
-            <p role="status" class="text-white">@displayValue</p>
+    <div class="bg-dark" style="width: 350px; height: 600px; border-radius: 15px; padding: 20px;">
+        <!-- Top Display: Full Formula -->
+        <div class="text-white" style="height: 40px; margin-bottom: 5px; text-align: right; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            @fullExpression
         </div>
+
+        <div class="d-flex justify-content-end align-items-end text-white display-6" style="height: 70px; margin-bottom: 10px;">
+            <p role="status" class="mb-0">@displayValue</p>
+        </div>
+
         <div class="d-flex flex-column gap-2">
-            <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick="Reset">AC</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick="ToggleSign">
-                    <i class="bi bi-plus-slash-minus"></i>
-                </button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 25px" @onclick='() => SetOperation("%")'>%</button>
-                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("÷")'>÷</button>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick="Reset">AC</button>
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick="ToggleSign">+/-</button>
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick='() => SetOperation("%")'>%</button>
+                <div style="width: 60px; height: 60px; background: transparent"></div>
             </div>
-            <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("7")'>7</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("8")'>8</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("9")'>9</button>
-                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("×")'>×</button>
+
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick="Reciprocal">1/x</button>
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick="Square">x²</button>
+                <button class="btn btn-secondary rounded-circle" style="width: 60px; height: 60px;" @onclick="SquareRoot">√x</button>
+                <button class="btn btn-warning rounded-circle text-white" style="width: 60px; height: 60px;" @onclick='() => SetOperation("×")'>×</button>
             </div>
-            <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("4")'>4</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("5")'>5</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("6")'>6</button>
-                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("-")'>-</button>
-            </div>
-            <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("1")'>1</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("2")'>2</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("3")'>3</button>
-                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick='() => SetOperation("+")'>+</button>
-            </div>
-            <div class="d-flex flex-row justify-content-around">
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick="DeleteLastCharacter">
-                    <i class="bi bi-backspace"></i>
-                </button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" @onclick='() => InputNumber("0")'>0</button>
-                <button class="btn btn-dark rounded-circle" style="width: 100px; height: 100px; font-size: 30px" >,</button>
-                <button class="btn rounded-circle" style="width: 100px; height: 100px; background-color: darkorange; color: white" @onclick="Calculate">=</button>
-            </div>
+
+            @foreach (var row in buttonRows)
+            {
+                <div class="d-flex justify-content-between">
+                    @foreach (var button in row)
+                    {
+                        <button class="btn rounded-circle" style="width: 60px; height: 60px; font-size: 20px; @GetButtonStyle(button)" @onclick="() => OnButtonClick(button)">
+                            @button
+                        </button>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
 
 @code {
-    private string displayValue = "0"; // Pour afficher l'opération dans le calculateur
-    private double currentResult = 0; // Pour stocker le résultat
+    private string displayValue = "0";
+    private string fullExpression = "";
+    private double currentResult = 0;
+    private string currentOperator = "";
+    private bool isNewInput = true;
 
-    // Fonction pour ajouter un chiffre à l'affichage
-    private void InputNumber(string number)
+    private readonly string[][] buttonRows = new[]
     {
-        // Si l'affichage est vide ou égal à "0", remplacer par le nouveau chiffre
-        if (string.IsNullOrEmpty(displayValue) || displayValue == "0")
+        new[] { "7", "8", "9", "÷" },
+        new[] { "4", "5", "6", "-" },
+        new[] { "1", "2", "3", "+" },
+        new[] { "⌫", "0", ".", "=" }
+    };
+
+    private void OnButtonClick(string button)
+    {
+        if (double.TryParse(button, out _) || button == ".")
         {
-            displayValue = number;
+            InputNumber(button);
+        }
+        else if (button == "=")
+        {
+            Calculate();
+        }
+        else if (button == "⌫")
+        {
+            DeleteLastCharacter();
         }
         else
         {
-            // Ajouter le chiffre à l'affichage
-            displayValue += number;
+            SetOperation(button);
         }
     }
 
-    // Fonction pour définir l'opération
+    private void InputNumber(string input)
+    {
+        if (isNewInput)
+        {
+            displayValue = input == "." ? "0." : input;
+            isNewInput = false;
+        }
+        else if (input == "." && displayValue.Contains("."))
+        {
+        } // Ignore second decimal point
+        else
+        {
+            displayValue += input;
+        }
+
+        UpdateFullExpression();
+    }
+
     private void SetOperation(string operation)
     {
-        // Vérifie que l'affichage n'est pas vide et que le dernier caractère n'est pas un opérateur
-        if (!string.IsNullOrEmpty(displayValue) && !IsLastCharacterOperator())
+        if (!string.IsNullOrEmpty(displayValue))
         {
-            // Ajoute l'opération à l'affichage
-            displayValue += " " + operation + " ";
+            if (!string.IsNullOrEmpty(currentOperator))
+            {
+                Calculate();
+            }
+
+            currentResult = double.Parse(displayValue.Replace(",", "."));
+            currentOperator = operation;
+            fullExpression += $" {displayValue} {operation}";
+            isNewInput = true;
         }
     }
 
-    // Fonction pour vérifier si le dernier caractère de l'affichage est un opérateur
-    private bool IsLastCharacterOperator()
-    {
-        // Vérifie le dernier caractère après avoir supprimé les espaces
-        var lastChar = displayValue.Trim().LastOrDefault();
-        return lastChar == '+' || lastChar == '-' || lastChar == '×' || lastChar == '÷';
-    }
-
-    // Fonction pour effectuer le calcul basé sur l'affichage courant
     private void Calculate()
     {
-        // Sépare l'affichage en parties (nombres et opérateurs)
-        var parts = displayValue.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        double total = 0; // Initialisation du total
+        if (string.IsNullOrEmpty(currentOperator)) return;
 
-        // Initialiser la variable pour l'opérateur courant
-        string currentOperator = "+";
-
-        // Parcourt chaque partie de l'expression
-        foreach (var part in parts)
+        double secondOperand = double.Parse(displayValue.Replace(",", "."));
+        switch (currentOperator)
         {
-            // Essaye de convertir la partie en nombre
-            if (double.TryParse(part.Replace(",", "."), out double num))
-            {
-                // Effectue l'opération en fonction de l'opérateur courant
-                if (currentOperator == "+")
-                {
-                    total += num; // Addition
-                }
-                else if (currentOperator == "-")
-                {
-                    total -= num; // Soustraction
-                }
-                else if (currentOperator == "×")
-                {
-                    total *= num; // Multiplication
-                }
-                else if (currentOperator == "÷")
-                {
-                    total /= num; // Division
-                }
-                else if (currentOperator == "%")
-                {
-                    total %= num; // Modulo
-                }
-            }
-            else
-            {
-                // Met à jour l'opérateur courant
-                currentOperator = part;
-            }
+            case "+":
+                currentResult += secondOperand;
+                break;
+            case "-":
+                currentResult -= secondOperand;
+                break;
+            case "×":
+                currentResult *= secondOperand;
+                break;
+            case "÷":
+                currentResult /= secondOperand;
+                break;
+            case "%":
+                currentResult %= secondOperand;
+                break;
         }
 
-        // Met à jour l'affichage avec le total calculé
-        displayValue = total.ToString().Replace(".", ","); // Affiche le résultat final avec une virgule
+        fullExpression += $" {displayValue} =";
+        displayValue = currentResult.ToString().Replace(".", ",");
+        currentOperator = "";
+        isNewInput = true;
     }
 
-    // Fonction pour réinitialiser l'affichage et le résultat
-    private void Reset()
+    private void Reciprocal()
     {
-        displayValue = "0"; // Réinitialise l'affichage à 0
-        currentResult = 0; // Réinitialise le résultat courant
+        if (double.TryParse(displayValue.Replace(",", "."), out double num) && num != 0)
+        {
+            fullExpression += $" 1/({displayValue})";
+            displayValue = (1 / num).ToString().Replace(".", ",");
+        }
     }
 
-    // Fonction pour basculer le signe du nombre affiché (positif/négatif)
+    private void Square()
+    {
+        if (double.TryParse(displayValue.Replace(",", "."), out double num))
+        {
+            fullExpression += $" ({displayValue})²";
+            displayValue = (num * num).ToString().Replace(".", ",");
+        }
+    }
+
+    private void SquareRoot()
+    {
+        if (double.TryParse(displayValue.Replace(",", "."), out double num) && num >= 0)
+        {
+            fullExpression += $" √({displayValue})";
+            displayValue = Math.Sqrt(num).ToString().Replace(".", ",");
+        }
+    }
+
     private void ToggleSign()
     {
-        // Vérifie que l'affichage n'est pas vide et convertit en nombre
-        if (!string.IsNullOrEmpty(displayValue) && double.TryParse(displayValue.Replace(",", "."), out double number))
+        if (double.TryParse(displayValue.Replace(",", "."), out double num))
         {
-            number = -number; // Change le signe
-            displayValue = number.ToString().Replace(".", ","); // Met à jour l'affichage
+            displayValue = (-num).ToString().Replace(".", ",");
+            UpdateFullExpression();
         }
     }
 
-    // Fonction pour supprimer le dernier caractère de l'affichage
     private void DeleteLastCharacter()
     {
-        // Vérifie que l'affichage n'est pas vide et n'est pas "0"
-        if (!string.IsNullOrEmpty(displayValue) && displayValue != "0")
+        if (!string.IsNullOrEmpty(displayValue) && displayValue.Length > 1)
         {
-            // Retire le dernier caractère
-            if (displayValue.Length > 1)
-            {
-                displayValue = displayValue.Substring(0, displayValue.Length - 1); // Supprime le dernier caractère
-            }
-            else
-            {
-                displayValue = "0"; // Réinitialise à 0 si c'est le seul caractère
-            }
+            displayValue = displayValue.Substring(0, displayValue.Length - 1);
+        }
+        else
+        {
+            displayValue = "0";
+        }
+
+        UpdateFullExpression();
+    }
+
+    private void Reset()
+    {
+        displayValue = "0";
+        fullExpression = "";
+        currentResult = 0;
+        currentOperator = "";
+        isNewInput = true;
+    }
+
+    private void UpdateFullExpression()
+    {
+        if (string.IsNullOrEmpty(currentOperator))
+        {
+            fullExpression = displayValue;
         }
     }
-}
 
+    private string GetButtonStyle(string button)
+    {
+        return button == "=" || button == "+" || button == "-" || button == "×" || button == "÷"
+            ? "background-color: orange; color: white;"
+            : "background-color: #333; color: white;";
+    }
+
+}
