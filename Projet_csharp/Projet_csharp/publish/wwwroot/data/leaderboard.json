@@ -1,1 +1,42 @@
-[{"Name":"Charlie","Score":125000}]
+[
+  {
+    "Name": "Charlie",
+    "Score": 125000
+  },
+  {
+    "Name": "Bob",
+    "Score": 64000
+  },
+  {
+    "Name": "Alice",
+    "Score": 32000
+  },
+  {
+    "Name": "Abdallah",
+    "Score": 8000
+  },
+  {
+    "Name": "Hugo",
+    "Score": 8000
+  },
+  {
+    "Name": "Abdallah",
+    "Score": 4000
+  },
+  {
+    "Name": "Hugo",
+    "Score": 4000
+  },
+  {
+    "Name": "Test",
+    "Score": 4000
+  },
+  {
+    "Name": "Test",
+    "Score": 4000
+  },
+  {
+    "Name": "Abdallah",
+    "Score": 2000
+  }
+]

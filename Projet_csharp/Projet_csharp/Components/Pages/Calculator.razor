@@ -1,13 +1,12 @@
-﻿@page "/windows-calculator"
+﻿@page "/calculator"
 @rendermode InteractiveServer
 
-<PageTitle>Windows Calculator</PageTitle>
+<PageTitle>Calculator</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
-    <h1>Windows Calculator</h1>
+    <h1>Calculator</h1>
 
     <div class="bg-dark" style="width: 350px; height: 600px; border-radius: 15px; padding: 20px;">
-        <!-- Top Display: Full Formula -->
         <div class="text-white" style="height: 40px; margin-bottom: 5px; text-align: right; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             @fullExpression
         </div>
@@ -90,7 +89,7 @@
         }
         else if (input == "." && displayValue.Contains("."))
         {
-        } // Ignore second decimal point
+        }
         else
         {
             displayValue += input;
